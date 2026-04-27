@@ -1,0 +1,17 @@
+---
+# Self-Service Portal Bootstrap Inventory
+# Copy this directory to inventories/rhdp-<customer>-<demo>/
+# All sensitive values are read from environment variables at runtime — never hardcode here.
+
+# AAP Controller
+controller_host: "{{ lookup('env', 'CONTROLLER_HOST') }}"
+controller_username: "{{ lookup('env', 'CONTROLLER_USERNAME') | default('admin') }}"
+controller_password: "{{ lookup('env', 'CONTROLLER_PASSWORD') }}"
+
+# OpenShift
+ocp_host: "{{ lookup('env', 'OCP_HOST') }}"
+ocp_token: "{{ lookup('env', 'OCP_TOKEN') }}"
+
+# Portal settings
+portal_namespace: aap-portal
+aap_organization: Default

@@ -1,0 +1,5 @@
+docs/dev-environment.md
+inventories/rhdp-*/
+!inventories/rhdp-sample-demo/
+collections/
+*.retry
