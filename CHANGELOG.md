@@ -6,6 +6,7 @@ All notable changes to this project will be documented in this file.
 
 ### Added
 - `playbooks/bootstrap_aap.yml` — configures AAP for portal: Hub credentials, vault credential, aap.selfservice project, OAuth application
+- `playbooks/bootstrap_portal.yml` — deploys redhat-rhaap-portal Helm chart on OpenShift with full OCI plugin auth and OAuth wiring
 
 ### Added
 - `ansible.cfg` — project-level galaxy server config (no tokens; tokens stay in `~/.ansible/ansible.cfg`)

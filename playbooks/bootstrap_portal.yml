@@ -127,7 +127,10 @@
             validate_certs: "{{ k8s_auth.validate_certs }}"
           register: cluster_pull_secret
 
-        - name: Copy cluster pull secret into aap-portal namespace
+        - name: Create OCI registry auth secret for init container
+          # The chart mounts rhaap-portal-dynamic-plugins-registry-auth at
+          # /opt/app-root/src/.config/containers/ inside the init container.
+          # Skopeo reads auth.json from that path to authenticate to registry.redhat.io.
           kubernetes.core.k8s:
             state: present
             host: "{{ k8s_auth.host }}"
@@ -137,26 +140,11 @@
               apiVersion: v1
               kind: Secret
               metadata:
-                name: registry-pull-secret
+                name: rhaap-portal-dynamic-plugins-registry-auth
                 namespace: "{{ portal_namespace }}"
-              type: kubernetes.io/dockerconfigjson
+              type: Opaque
               data:
-                .dockerconfigjson: "{{ cluster_pull_secret.resources[0].data['.dockerconfigjson'] }}"
-
-        - name: Link pull secret to default service account
-          kubernetes.core.k8s:
-            state: present
-            host: "{{ k8s_auth.host }}"
-            api_key: "{{ k8s_auth.api_key }}"
-            validate_certs: "{{ k8s_auth.validate_certs }}"
-            definition:
-              apiVersion: v1
-              kind: ServiceAccount
-              metadata:
-                name: default
-                namespace: "{{ portal_namespace }}"
-              imagePullSecrets:
-                - name: registry-pull-secret
+                auth.json: "{{ cluster_pull_secret.resources[0].data['.dockerconfigjson'] }}"
 
         - name: Create secrets-scm secret
           kubernetes.core.k8s:
@@ -202,7 +190,13 @@
           redhat-developer-hub:
             global:
               clusterRouterBase: "{{ cluster_router_base }}"
-              pluginMode: tarball
+              pluginMode: oci
+            upstream:
+              backstage:
+                appConfig:
+                  integrations:
+                    github: []
+                    gitlab: []
         wait: true
         wait_timeout: "10m"
         state: present
