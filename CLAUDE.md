@@ -59,6 +59,14 @@ ansible-playbook playbooks/bootstrap_portal.yml \
   --vault-password-file ~/.ansible/secrets2
 ```
 
+## AAP Gateway OAuth — Critical Facts
+
+The gateway's `/o/authorize/` and `/o/token/` are served by the **gateway itself** (not proxied to the controller). OAuth applications must be created in the **gateway** registry (`/api/gateway/v1/applications/`), not the controller.
+
+**NEVER patch the client_secret after creation.** The gateway hashes secrets differently on PATCH vs POST, which always causes `invalid_client` at `/o/token/`. The only way to get valid credentials is to capture `client_secret` from the POST creation response. `bootstrap_portal.yml` deletes and recreates the app on every run to ensure fresh, valid credentials are always stored in the OCP secret.
+
+The controller's `/api/controller/v2/applications/` and the gateway's `/api/gateway/v1/applications/` are separate registries — do not mix them.
+
 ## ansible.platform vs ansible.controller Module Map
 
 `ansible.platform` talks to the AAP gateway API. `ansible.controller` talks to the controller API. They have different connection parameter names and different module_defaults group names.
@@ -145,7 +153,7 @@ The bootstrap playbook (`playbooks/bootstrap_portal.yml`) performs these steps i
 
 Key Helm values to configure:
 - `redhat-developer-hub.global.clusterRouterBase`
-- `redhat-developer-hub.global.pluginMode: tarball` — use tarball, not oci. OCI mode requires registry.redhat.io auth injected into the init container at the node level; RHDP clusters do not have this configured. tarball uses plugins bundled in the container image and works without additional auth.
+- `redhat-developer-hub.global.pluginMode: oci` — correct mode. Requires `rhaap-portal-dynamic-plugins-registry-auth` secret (see bootstrap_portal.yml). tarball mode requires `plugin-registry:8080` service not deployed by this chart.
 - `redhat-developer-hub.upstream.backstage.appConfig.catalog.providers.rhaap.orgs`
 
 ## Playbook Execution Order

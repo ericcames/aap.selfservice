@@ -88,24 +88,7 @@
         interval: 10
         timeout: 120
 
-    # -------------------------------------------------------------------------
-    # OAuth Application (portal authentication)
-    # redirect_uris is a placeholder — updated by bootstrap_portal.yml once the
-    # portal route is known.
-    # -------------------------------------------------------------------------
-
-    - name: Create portal OAuth application
-      ansible.platform.application:
-        name: aap-selfservice-portal
-        organization: Default
-        authorization_grant_type: authorization-code
-        client_type: confidential
-        redirect_uris:
-          - "https://placeholder.example.com/oauth/callback"
-        state: present
-      register: oauth_app_result
-
-    - name: Show OAuth client_id for portal config
-      ansible.builtin.debug:
-        msg: "OAuth app created — client_id: {{ oauth_app_result.client_id | default('see AAP UI → Applications') }}"
-      when: oauth_app_result.changed
+    # OAuth application is created and managed entirely by bootstrap_portal.yml.
+    # It must be deleted and recreated on each portal deploy to capture a fresh
+    # client_secret from the gateway's creation response — patching the secret
+    # after creation causes invalid_client errors at /o/token/.

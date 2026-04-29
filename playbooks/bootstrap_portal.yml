@@ -28,10 +28,15 @@
         cluster_router_base: "{{ ocp_host | regex_replace('^https://api\\.', 'apps.') | regex_replace(':\\d+$', '') }}"
 
     # -------------------------------------------------------------------------
-    # OAuth Application — set a known client_secret so we can store it in OCP
+    # OAuth Application — delete and recreate on every run so the client_secret
+    # is always captured fresh from the gateway's creation response.
+    #
+    # IMPORTANT: Do NOT patch the client_secret after creation. The gateway
+    # hashes secrets differently on PATCH vs POST, resulting in invalid_client
+    # errors at /o/token/. Always delete + recreate to get valid credentials.
     # -------------------------------------------------------------------------
 
-    - name: Get OAuth application details
+    - name: Delete existing gateway OAuth application if present
       ansible.builtin.uri:
         url: "{{ aap_hostname }}/api/gateway/v1/applications/?name=aap-selfservice-portal"
         method: GET
@@ -39,35 +44,42 @@
         url_password: "{{ aap_password }}"
         force_basic_auth: true
         validate_certs: "{{ aap_validate_certs }}"
-        status_code: 200
       register: oauth_app_query
 
-    - name: Fail if OAuth application not found
-      ansible.builtin.fail:
-        msg: "OAuth application 'aap-selfservice-portal' not found. Run bootstrap_aap.yml first."
-      when: oauth_app_query.json.count == 0
-
-    - name: Set OAuth app facts
-      ansible.builtin.set_fact:
-        oauth_app_id: "{{ oauth_app_query.json.results[0].id }}"
-        oauth_client_id: "{{ oauth_app_query.json.results[0].client_id }}"
-
-    - name: Generate OAuth client_secret
-      ansible.builtin.set_fact:
-        oauth_client_secret: "{{ lookup('ansible.builtin.password', '/dev/null', length=48, chars=['ascii_letters', 'digits']) }}"
-
-    - name: Patch OAuth application with new client_secret
+    - name: Delete existing OAuth application
       ansible.builtin.uri:
-        url: "{{ aap_hostname }}/api/gateway/v1/applications/{{ oauth_app_id }}/"
-        method: PATCH
+        url: "{{ aap_hostname }}/api/gateway/v1/applications/{{ oauth_app_query.json.results[0].id }}/"
+        method: DELETE
+        url_username: "{{ aap_username }}"
+        url_password: "{{ aap_password }}"
+        force_basic_auth: true
+        validate_certs: "{{ aap_validate_certs }}"
+        status_code: 204
+      when: oauth_app_query.json.count > 0
+
+    - name: Create gateway OAuth application and capture credentials
+      ansible.builtin.uri:
+        url: "{{ aap_hostname }}/api/gateway/v1/applications/"
+        method: POST
         url_username: "{{ aap_username }}"
         url_password: "{{ aap_password }}"
         force_basic_auth: true
         validate_certs: "{{ aap_validate_certs }}"
         body_format: json
         body:
-          client_secret: "{{ oauth_client_secret }}"
-        status_code: 200
+          name: "aap-selfservice-portal"
+          organization: 1
+          client_type: "confidential"
+          authorization_grant_type: "authorization-code"
+          redirect_uris: "https://placeholder.example.com/oauth/callback"
+          skip_authorization: false
+        status_code: 201
+      register: oauth_app_created
+
+    - name: Set OAuth credentials from creation response
+      ansible.builtin.set_fact:
+        oauth_client_id: "{{ oauth_app_created.json.client_id }}"
+        oauth_client_secret: "{{ oauth_app_created.json.client_secret }}"
 
     # -------------------------------------------------------------------------
     # OCP namespace + secrets + portal token
