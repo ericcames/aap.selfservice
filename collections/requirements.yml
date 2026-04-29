@@ -1,0 +1,8 @@
+---
+collections:
+  - name: ansible.platform
+    version: "2.6.20260306"
+  - name: ansible.controller
+    version: "4.7.10"
+  - name: kubernetes.core
+    version: "5.4.1"

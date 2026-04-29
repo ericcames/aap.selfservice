@@ -56,6 +56,19 @@ Before running the bootstrap playbook you need:
 6. **`oc` CLI** — logged in to the OCP cluster
 7. **`helm` CLI** — available locally
 8. **`~/.ansible/secrets2`** — vault password file (same as `aap.as.code`)
+9. **Ansible collections** — install once, shared across all repos. If your Hub token is already in `~/.ansible/ansible.cfg` (e.g. from `aap.as.code` setup):
+
+```bash
+ANSIBLE_CONFIG=~/.ansible/ansible.cfg ansible-galaxy collection install -r collections/requirements.yml
+```
+
+If you don't have `~/.ansible/ansible.cfg`, get your token from [console.redhat.com](https://console.redhat.com) → Automation Hub → Connect to Hub → API token, then pass it inline:
+
+```bash
+ANSIBLE_GALAXY_SERVER_RH_CERTIFIED_TOKEN=<your_token> \
+ANSIBLE_GALAXY_SERVER_RH_VALIDATED_TOKEN=<your_token> \
+ansible-galaxy collection install -r collections/requirements.yml
+```
 
 ## Setup Steps (High Level)
 
