@@ -102,7 +102,14 @@ ANSIBLE_CONFIG=~/.ansible/ansible.cfg ansible-galaxy collection install -r colle
 ## Key Conventions
 
 - **`ansible.platform` over `ansible.controller`** — prefer `ansible.platform` where a module exists; fall back to `ansible.controller` only when there is no platform equivalent. See the module map below.
-- **Token cleanup** — any task that creates an AAP API token must delete it in an `always:` block
+- **Token cleanup** — stale tokens accumulate and slow AAP down over time. Always delete tokens in the same block where they are created. The only exception is the portal service token (description: `aap-selfservice-portal service token`) which is intentionally long-lived. When writing curl-based scripts, always create ONE token by capturing both `token` and `id` from a single API call — never make two separate calls. Delete it last, after all work is done:
+  ```bash
+  TOKEN_JSON=$(curl -s -k -X POST -u $USER:$PASS "$HOST/api/gateway/v1/tokens/" -d '{"scope":"write"}' -H "Content-Type: application/json")
+  TOKEN=$(echo $TOKEN_JSON | python3 -c "import sys,json; print(json.load(sys.stdin)['token'])")
+  TOKEN_ID=$(echo $TOKEN_JSON | python3 -c "import sys,json; print(json.load(sys.stdin)['id'])")
+  # ... do work ...
+  curl -s -k -X DELETE -H "Authorization: Bearer $TOKEN" "$HOST/api/gateway/v1/tokens/$TOKEN_ID/"
+  ```
 - **Helm chart version pinned at 2.1.0** — bump deliberately and document in CHANGELOG.md
 - **Real inventory directories are gitignored** — `inventories/rhdp-*/` is in `.gitignore` except for `rhdp-sample-demo/` which is the template; never commit customer/environment-specific inventories
 - **`docs/dev-environment.md` is gitignored** — use it for local credentials and notes; never commit it
@@ -121,7 +128,7 @@ The bootstrap playbook (`playbooks/bootstrap_portal.yml`) performs these steps i
 
 Key Helm values to configure:
 - `redhat-developer-hub.global.clusterRouterBase`
-- `redhat-developer-hub.global.pluginMode: oci`
+- `redhat-developer-hub.global.pluginMode: tarball` — use tarball, not oci. OCI mode requires registry.redhat.io auth injected into the init container at the node level; RHDP clusters do not have this configured. tarball uses plugins bundled in the container image and works without additional auth.
 - `redhat-developer-hub.upstream.backstage.appConfig.catalog.providers.rhaap.orgs`
 
 ## Playbook Execution Order

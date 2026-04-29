@@ -9,8 +9,8 @@ controller_username: "{{ lookup('env', 'CONTROLLER_USERNAME') | default('admin')
 controller_password: "{{ lookup('env', 'CONTROLLER_PASSWORD') }}"
 
 # OpenShift
-ocp_host: "{{ lookup('env', 'OCP_HOST') }}"
-ocp_token: "{{ lookup('env', 'OCP_TOKEN') }}"
+ocp_host: "{{ lookup('ansible.builtin.env', 'OCP_HOST') }}"
+ocp_token: "{{ lookup('ansible.builtin.env', 'OCP_TOKEN') }}"
 
 # Portal settings
 portal_namespace: aap-portal

@@ -67,7 +67,24 @@ to function. This replaces the dependency on `aap.as.code`.
 
 **Collections:** `ansible.platform` (OAuth app via gateway API), `ansible.controller` (credentials, project — no platform equivalent exists)
 
-### Phase 3 — Portal Bootstrap Playbook
+### Phase 3 — Portal Bootstrap Playbook (In Progress)
+
+`playbooks/bootstrap_portal.yml` exists and handles everything up to Helm chart deployment successfully. The Helm chart deployment itself is blocked on plugin installation inside the init container.
+
+**What works:**
+- clusterRouterBase derivation
+- OAuth app client_secret rotation
+- AAP service token creation (with block/rescue cleanup)
+- OCP namespace, pull secret, secrets, SCM secret creation
+
+**Blocked on — `install-dynamic-plugins` init container:**
+- `pluginMode: oci` — skopeo inside the init container cannot authenticate to `registry.redhat.io`. The cluster global pull secret covers `registry.redhat.io` but isn't accessible to subprocess calls inside the container. Needs the auth file mounted into the init container.
+- `pluginMode: tarball` — init container looks for `http://plugin-registry:8080/` which is a Kubernetes service not deployed by this chart. Needs either a plugin registry sidecar or a different chart configuration.
+
+**Next steps:**
+- Inspect chart templates to find how to mount credentials into the init container for OCI mode
+- OR find the chart value that deploys the plugin registry service for tarball mode
+- OR check official RHDP docs for the supported deployment pattern
 
 Build `playbooks/bootstrap_portal.yml` — full portal install on OpenShift.
 Reference: [Installing Self-Service Automation Portal](https://docs.redhat.com/en/documentation/red_hat_ansible_automation_platform/2.6/html/installing_self-service_automation_portal/index)

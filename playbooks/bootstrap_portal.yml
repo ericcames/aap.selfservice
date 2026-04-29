@@ -1,0 +1,243 @@
+---
+- name: Bootstrap Self-Service Portal on OpenShift
+  hosts: localhost
+  connection: local
+  gather_facts: false
+
+  module_defaults:
+    group/ansible.platform.gateway:
+      aap_hostname: "{{ aap_hostname }}"
+      aap_username: "{{ aap_username }}"
+      aap_password: "{{ aap_password }}"
+      aap_validate_certs: "{{ aap_validate_certs }}"
+
+  vars:
+    k8s_auth:
+      host: "{{ ocp_host }}"
+      api_key: "{{ ocp_token }}"
+      validate_certs: false
+
+  tasks:
+
+    # -------------------------------------------------------------------------
+    # Derived facts
+    # -------------------------------------------------------------------------
+
+    - name: Derive clusterRouterBase from OCP API URL
+      ansible.builtin.set_fact:
+        cluster_router_base: "{{ ocp_host | regex_replace('^https://api\\.', 'apps.') | regex_replace(':\\d+$', '') }}"
+
+    # -------------------------------------------------------------------------
+    # OAuth Application — set a known client_secret so we can store it in OCP
+    # -------------------------------------------------------------------------
+
+    - name: Get OAuth application details
+      ansible.builtin.uri:
+        url: "{{ aap_hostname }}/api/gateway/v1/applications/?name=aap-selfservice-portal"
+        method: GET
+        url_username: "{{ aap_username }}"
+        url_password: "{{ aap_password }}"
+        force_basic_auth: true
+        validate_certs: "{{ aap_validate_certs }}"
+        status_code: 200
+      register: oauth_app_query
+
+    - name: Fail if OAuth application not found
+      ansible.builtin.fail:
+        msg: "OAuth application 'aap-selfservice-portal' not found. Run bootstrap_aap.yml first."
+      when: oauth_app_query.json.count == 0
+
+    - name: Set OAuth app facts
+      ansible.builtin.set_fact:
+        oauth_app_id: "{{ oauth_app_query.json.results[0].id }}"
+        oauth_client_id: "{{ oauth_app_query.json.results[0].client_id }}"
+
+    - name: Generate OAuth client_secret
+      ansible.builtin.set_fact:
+        oauth_client_secret: "{{ lookup('ansible.builtin.password', '/dev/null', length=48, chars=['ascii_letters', 'digits']) }}"
+
+    - name: Patch OAuth application with new client_secret
+      ansible.builtin.uri:
+        url: "{{ aap_hostname }}/api/gateway/v1/applications/{{ oauth_app_id }}/"
+        method: PATCH
+        url_username: "{{ aap_username }}"
+        url_password: "{{ aap_password }}"
+        force_basic_auth: true
+        validate_certs: "{{ aap_validate_certs }}"
+        body_format: json
+        body:
+          client_secret: "{{ oauth_client_secret }}"
+        status_code: 200
+
+    # -------------------------------------------------------------------------
+    # OCP namespace + secrets + portal token
+    # Token creation is inside a block so it gets cleaned up if OCP steps fail.
+    # -------------------------------------------------------------------------
+
+    - name: Create OCP namespace, secrets, and portal service token
+      block:
+
+        - name: Create aap-portal namespace
+          kubernetes.core.k8s:
+            api_version: v1
+            kind: Namespace
+            name: "{{ portal_namespace }}"
+            state: present
+            host: "{{ k8s_auth.host }}"
+            api_key: "{{ k8s_auth.api_key }}"
+            validate_certs: "{{ k8s_auth.validate_certs }}"
+
+        # Created here (after namespace succeeds) so rescue can clean it up on failure.
+        # Intentionally NOT deleted in always: — this token is stored in OCP and used
+        # by the portal backend to sync job templates and serve API requests.
+        - name: Create AAP service token for portal
+          ansible.platform.token:
+            description: "aap-selfservice-portal service token"
+            scope: write
+            state: present
+          register: portal_token_result
+
+        - name: Create secrets-rhaap-portal secret
+          kubernetes.core.k8s:
+            state: present
+            host: "{{ k8s_auth.host }}"
+            api_key: "{{ k8s_auth.api_key }}"
+            validate_certs: "{{ k8s_auth.validate_certs }}"
+            definition:
+              apiVersion: v1
+              kind: Secret
+              metadata:
+                name: secrets-rhaap-portal
+                namespace: "{{ portal_namespace }}"
+              type: Opaque
+              stringData:
+                aap-host-url: "{{ aap_hostname }}"
+                oauth-client-id: "{{ oauth_client_id }}"
+                oauth-client-secret: "{{ oauth_client_secret }}"
+                aap-token: "{{ portal_token_result.ansible_facts.aap_token.token }}"
+
+        - name: Read cluster global pull secret
+          kubernetes.core.k8s_info:
+            api_version: v1
+            kind: Secret
+            name: pull-secret
+            namespace: openshift-config
+            host: "{{ k8s_auth.host }}"
+            api_key: "{{ k8s_auth.api_key }}"
+            validate_certs: "{{ k8s_auth.validate_certs }}"
+          register: cluster_pull_secret
+
+        - name: Copy cluster pull secret into aap-portal namespace
+          kubernetes.core.k8s:
+            state: present
+            host: "{{ k8s_auth.host }}"
+            api_key: "{{ k8s_auth.api_key }}"
+            validate_certs: "{{ k8s_auth.validate_certs }}"
+            definition:
+              apiVersion: v1
+              kind: Secret
+              metadata:
+                name: registry-pull-secret
+                namespace: "{{ portal_namespace }}"
+              type: kubernetes.io/dockerconfigjson
+              data:
+                .dockerconfigjson: "{{ cluster_pull_secret.resources[0].data['.dockerconfigjson'] }}"
+
+        - name: Link pull secret to default service account
+          kubernetes.core.k8s:
+            state: present
+            host: "{{ k8s_auth.host }}"
+            api_key: "{{ k8s_auth.api_key }}"
+            validate_certs: "{{ k8s_auth.validate_certs }}"
+            definition:
+              apiVersion: v1
+              kind: ServiceAccount
+              metadata:
+                name: default
+                namespace: "{{ portal_namespace }}"
+              imagePullSecrets:
+                - name: registry-pull-secret
+
+        - name: Create secrets-scm secret
+          kubernetes.core.k8s:
+            state: present
+            host: "{{ k8s_auth.host }}"
+            api_key: "{{ k8s_auth.api_key }}"
+            validate_certs: "{{ k8s_auth.validate_certs }}"
+            definition:
+              apiVersion: v1
+              kind: Secret
+              metadata:
+                name: secrets-scm
+                namespace: "{{ portal_namespace }}"
+              type: Opaque
+              stringData:
+                github-token: ""
+                gitlab-token: ""
+
+      rescue:
+        - name: Delete portal service token on failure
+          ansible.platform.token:
+            existing_token_id: "{{ portal_token_result.ansible_facts.aap_token.id }}"
+            state: absent
+          when: portal_token_result.ansible_facts is defined
+
+        - name: Re-raise failure
+          ansible.builtin.fail:
+            msg: "Portal bootstrap failed during OCP setup. Portal service token has been cleaned up."
+
+    # -------------------------------------------------------------------------
+    # Helm chart deployment
+    # -------------------------------------------------------------------------
+
+    - name: Deploy redhat-rhaap-portal Helm chart
+      kubernetes.core.helm:
+        name: rhaap-portal
+        chart_ref: openshift-charts/redhat-rhaap-portal
+        chart_version: "2.1.0"
+        release_namespace: "{{ portal_namespace }}"
+        create_namespace: false
+        kubeconfig: "{{ lookup('env', 'KUBECONFIG') | default(lookup('env', 'HOME') + '/.kube/config', true) }}"
+        values:
+          redhat-developer-hub:
+            global:
+              clusterRouterBase: "{{ cluster_router_base }}"
+              pluginMode: tarball
+        wait: true
+        wait_timeout: "10m"
+        state: present
+
+    # -------------------------------------------------------------------------
+    # Get portal route and update OAuth redirect URI
+    # -------------------------------------------------------------------------
+
+    - name: Wait for portal route
+      kubernetes.core.k8s_info:
+        api_version: route.openshift.io/v1
+        kind: Route
+        namespace: "{{ portal_namespace }}"
+        host: "{{ k8s_auth.host }}"
+        api_key: "{{ k8s_auth.api_key }}"
+        validate_certs: "{{ k8s_auth.validate_certs }}"
+      register: portal_routes
+      retries: 20
+      delay: 15
+      until: portal_routes.resources | length > 0
+
+    - name: Set portal URL
+      ansible.builtin.set_fact:
+        portal_url: "https://{{ portal_routes.resources[0].spec.host }}"
+
+    - name: Update OAuth application redirect URI
+      ansible.platform.application:
+        name: aap-selfservice-portal
+        organization: Default
+        authorization_grant_type: authorization-code
+        client_type: confidential
+        redirect_uris:
+          - "{{ portal_url }}/api/auth/ansible/handler"
+        state: present
+
+    - name: Show portal URL
+      ansible.builtin.debug:
+        msg: "Portal deployed at: {{ portal_url }}"
