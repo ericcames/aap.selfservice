@@ -229,7 +229,7 @@
         authorization_grant_type: authorization-code
         client_type: confidential
         redirect_uris:
-          - "{{ portal_url }}/api/auth/ansible/handler"
+          - "{{ portal_url }}/api/auth/rhaap/handler/frame"
         state: present
 
     - name: Show portal URL
