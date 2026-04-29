@@ -55,20 +55,14 @@ Before running the bootstrap playbook you need:
 5. **Git Personal Access Token** — GitHub or GitLab PAT for content/template sources
 6. **`oc` CLI** — logged in to the OCP cluster
 7. **`helm` CLI** — available locally
-8. **`~/.ansible/secrets2`** — vault password file (same as `aap.as.code`)
-9. **Ansible collections** — install once, shared across all repos. If your Hub token is already in `~/.ansible/ansible.cfg` (e.g. from `aap.as.code` setup):
+8. **`~/.ansible/secrets2`** — vault password file (one line: your vault password)
+9. **Ansible collections** — install once, shared across all repos. Your Automation Hub token must be in `~/.ansible/ansible.cfg` under `[galaxy_server.rh_certified]`. Get it from [console.redhat.com](https://console.redhat.com) → Automation Hub → Connect to Hub → API token. Then install:
 
 ```bash
 ANSIBLE_CONFIG=~/.ansible/ansible.cfg ansible-galaxy collection install -r collections/requirements.yml
 ```
 
-If you don't have `~/.ansible/ansible.cfg`, get your token from [console.redhat.com](https://console.redhat.com) → Automation Hub → Connect to Hub → API token, then pass it inline:
-
-```bash
-ANSIBLE_GALAXY_SERVER_RH_CERTIFIED_TOKEN=<your_token> \
-ANSIBLE_GALAXY_SERVER_RH_VALIDATED_TOKEN=<your_token> \
-ansible-galaxy collection install -r collections/requirements.yml
-```
+Run `/selfservice-first-time` for a guided setup if this is a new machine.
 
 ## Setup Steps (High Level)
 
@@ -95,14 +89,11 @@ aap.selfservice/
 └── CHANGELOG.md
 ```
 
-## Relationship to aap.as.code
+## Getting Started
 
-This repo is a follow-on to [aap.as.code](https://github.com/ericcames/aap.as.code).
-Run `aap.as.code` bootstrap and CaC setup first, then run this repo's bootstrap to
-layer the self-service portal on top.
+This repo is self-contained. Clone it, run `/selfservice-first-time` in Claude Code to verify prerequisites, then run `/selfservice-bootstrap` to deploy.
 
 ```
-Step 1 → aap.as.code/playbooks/bootstrap_dev.yml      (sets up AAP)
-Step 2 → aap.as.code Setup - AAP - CAC job template   (loads demo config)
-Step 3 → aap.selfservice/playbooks/bootstrap_portal.yml (installs portal)
+Step 1 → /selfservice-first-time   (verify local prerequisites)
+Step 2 → /selfservice-bootstrap    (configure AAP + install portal)
 ```
