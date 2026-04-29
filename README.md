@@ -66,12 +66,26 @@ Run `/selfservice-first-time` for a guided setup if this is a new machine.
 
 ## Getting Started
 
-This repo is self-contained. Clone it, run `/selfservice-first-time` in Claude Code to verify prerequisites, then run `/selfservice-bootstrap` to deploy.
+1. **Install or update Claude Code:**
+   - New install: [claude.ai/code](https://claude.ai/code)
+   - Already installed: `claude update`
 
-```
-Step 1 → /selfservice-first-time   (verify local prerequisites)
-Step 2 → /selfservice-bootstrap    (configure AAP + install portal)
-```
+2. **Clone this repo:**
+   ```bash
+   git clone https://github.com/ericcames/aap.selfservice.git
+   cd aap.selfservice
+   ```
+
+3. **Launch Claude Code:**
+   ```bash
+   claude .
+   ```
+
+4. **Run the setup skills inside Claude Code:**
+   ```
+   /selfservice-first-time    ← guided prerequisite setup (first time only)
+   /selfservice-bootstrap     ← deploy AAP config + portal
+   ```
 
 ## Repository Structure
 
