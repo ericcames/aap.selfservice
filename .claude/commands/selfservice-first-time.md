@@ -149,7 +149,7 @@ Confirm the file is non-empty after writing.
 
 Skip if all three collections are found by `ansible-galaxy collection list` (they may be at `~/.ansible/collections/` or the system Python path).
 
-Show this command and ask for confirmation before running:
+The Hub token must be in `~/.ansible/ansible.cfg` — never pass it on the command line. Show this command and ask for confirmation before running:
 
 ```bash
 ANSIBLE_CONFIG=~/.ansible/ansible.cfg \
