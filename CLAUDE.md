@@ -42,6 +42,43 @@ ansible-playbook playbooks/bootstrap_portal.yml \
   --vault-password-file ~/.ansible/secrets2
 ```
 
+## ansible.platform vs ansible.controller Module Map
+
+`ansible.platform` talks to the AAP gateway API. `ansible.controller` talks to the controller API. They have different connection parameter names and different module_defaults group names.
+
+| Task | Use | Notes |
+|------|-----|-------|
+| OAuth application | `ansible.platform.application` | `ansible.controller.application` is deprecated |
+| Organization, team, user | `ansible.platform.organization/team/user` | Platform versions lack `galaxy_credentials` |
+| Galaxy credentials on org | `ansible.controller.organization` | Only controller version supports `galaxy_credentials` |
+| Credentials | `ansible.controller.credential` | No platform equivalent |
+| Projects | `ansible.controller.project` / `project_update` | No platform equivalent |
+| Job templates | `ansible.controller.job_template` | No platform equivalent |
+
+**Connection parameters:**
+
+| Collection | Host param | User param | Pass param | Cert param |
+|------------|-----------|-----------|-----------|-----------|
+| `ansible.platform` | `aap_hostname` | `aap_username` | `aap_password` | `aap_validate_certs` |
+| `ansible.controller` | `controller_host` | `controller_username` | `controller_password` | `validate_certs` |
+
+**module_defaults groups:**
+```yaml
+module_defaults:
+  group/ansible.controller.controller:
+    controller_host: "{{ aap_hostname }}"
+    controller_username: "{{ aap_username }}"
+    controller_password: "{{ aap_password }}"
+    validate_certs: "{{ aap_validate_certs }}"
+  group/ansible.platform.gateway:
+    aap_hostname: "{{ aap_hostname }}"
+    aap_username: "{{ aap_username }}"
+    aap_password: "{{ aap_password }}"
+    aap_validate_certs: "{{ aap_validate_certs }}"
+```
+
+Note: our inventory vars use `aap_hostname/aap_username/aap_password` — these match `ansible.platform` directly but must be mapped to `controller_*` for `ansible.controller`.
+
 ## ansible.cfg Design
 
 There are two ansible.cfg files in play — understanding both prevents confusion:
@@ -64,7 +101,7 @@ ANSIBLE_CONFIG=~/.ansible/ansible.cfg ansible-galaxy collection install -r colle
 
 ## Key Conventions
 
-- **`ansible.platform` over `ansible.controller`** — use `ansible.platform` modules for all AAP API interactions; `ansible.controller` is legacy
+- **`ansible.platform` over `ansible.controller`** — prefer `ansible.platform` where a module exists; fall back to `ansible.controller` only when there is no platform equivalent. See the module map below.
 - **Token cleanup** — any task that creates an AAP API token must delete it in an `always:` block
 - **Helm chart version pinned at 2.1.0** — bump deliberately and document in CHANGELOG.md
 - **Real inventory directories are gitignored** — `inventories/rhdp-*/` is in `.gitignore` except for `rhdp-sample-demo/` which is the template; never commit customer/environment-specific inventories

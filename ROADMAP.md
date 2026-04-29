@@ -65,7 +65,7 @@ to function. This replaces the dependency on `aap.as.code`.
 - [x] `aap.selfservice` project (synced from `main`)
 - [x] AAP OAuth Application for portal authentication
 
-**Collections:** `ansible.platform` (OAuth app), `ansible.controller` (credentials, project)
+**Collections:** `ansible.platform` (OAuth app via gateway API), `ansible.controller` (credentials, project — no platform equivalent exists)
 
 ### Phase 3 — Portal Bootstrap Playbook
 
