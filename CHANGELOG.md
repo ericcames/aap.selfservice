@@ -5,6 +5,9 @@ All notable changes to this project will be documented in this file.
 ## [Unreleased]
 
 ### Added
+- `playbooks/bootstrap_aap.yml` — configures AAP for portal: Hub credentials, vault credential, aap.selfservice project, OAuth application
+
+### Added
 - `ansible.cfg` — project-level galaxy server config (no tokens; tokens stay in `~/.ansible/ansible.cfg`)
 - `collections/requirements.yml` — pinned collection versions (ansible.platform, ansible.controller, kubernetes.core)
 - `CLAUDE.md` — project guidance for Claude Code including ansible.cfg design explanation

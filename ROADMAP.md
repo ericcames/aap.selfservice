@@ -55,18 +55,17 @@ first time has everything they need without relying on published plugins.
 - [x] `/selfservice-first-time` — verify and walk through all local prerequisites
 - [ ] `/selfservice-bootstrap` — generate inventory, run playbooks, verify results
 
-### Phase 2 — AAP Bootstrap Playbook
+### Phase 2 — AAP Bootstrap Playbook (Complete)
 
-Build `playbooks/bootstrap_aap.yml` — minimum AAP configuration needed for the portal
+`playbooks/bootstrap_aap.yml` — minimum AAP configuration needed for the portal
 to function. This replaces the dependency on `aap.as.code`.
 
-**Tasks:**
-1. Hub credentials (`Automation Hub - certified`, `Automation Hub - validated`) assigned to Default Organization
-2. Vault credential
-3. `aap.selfservice` project (synced from `main`)
-4. AAP OAuth Application for portal authentication
+- [x] Hub credentials (`Automation Hub - certified`, `Automation Hub - validated`) assigned to Default Organization
+- [x] Vault credential
+- [x] `aap.selfservice` project (synced from `main`)
+- [x] AAP OAuth Application for portal authentication
 
-**Collections:** `ansible.platform`
+**Collections:** `ansible.platform` (OAuth app), `ansible.controller` (credentials, project)
 
 ### Phase 3 — Portal Bootstrap Playbook
 

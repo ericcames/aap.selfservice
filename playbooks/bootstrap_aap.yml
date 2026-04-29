@@ -1,0 +1,111 @@
+---
+- name: Bootstrap AAP for Self-Service Portal
+  hosts: localhost
+  connection: local
+  gather_facts: false
+
+  module_defaults:
+    group/ansible.controller.controller:
+      controller_host: "{{ aap_hostname }}"
+      controller_username: "{{ aap_username }}"
+      controller_password: "{{ aap_password }}"
+      validate_certs: "{{ aap_validate_certs }}"
+    group/ansible.platform.gateway:
+      aap_hostname: "{{ aap_hostname }}"
+      aap_username: "{{ aap_username }}"
+      aap_password: "{{ aap_password }}"
+      aap_validate_certs: "{{ aap_validate_certs }}"
+
+  tasks:
+
+    # -------------------------------------------------------------------------
+    # Hub Credentials
+    # -------------------------------------------------------------------------
+
+    - name: Create Automation Hub - certified credential
+      ansible.controller.credential:
+        name: "Automation Hub - certified"
+        organization: Default
+        credential_type: "Ansible Galaxy/Automation Hub API Token"
+        inputs:
+          url: "https://console.redhat.com/api/automation-hub/content/published/"
+          auth_url: "{{ hub_auth_url }}"
+          token: "{{ hub_token }}"
+        state: present
+
+    - name: Create Automation Hub - validated credential
+      ansible.controller.credential:
+        name: "Automation Hub - validated"
+        organization: Default
+        credential_type: "Ansible Galaxy/Automation Hub API Token"
+        inputs:
+          url: "https://console.redhat.com/api/automation-hub/content/validated/"
+          auth_url: "{{ hub_auth_url }}"
+          token: "{{ hub_token }}"
+        state: present
+
+    - name: Assign Hub credentials to Default Organization
+      ansible.controller.organization:
+        name: Default
+        galaxy_credentials:
+          - "Automation Hub - certified"
+          - "Automation Hub - validated"
+        state: present
+
+    # -------------------------------------------------------------------------
+    # Vault Credential
+    # -------------------------------------------------------------------------
+
+    - name: Create vault credential
+      ansible.controller.credential:
+        name: "{{ my_vault }}"
+        organization: Default
+        credential_type: Vault
+        inputs:
+          vault_password: "{{ vault_password }}"
+        state: present
+
+    # -------------------------------------------------------------------------
+    # Project
+    # -------------------------------------------------------------------------
+
+    - name: Create aap.selfservice project
+      ansible.controller.project:
+        name: aap.selfservice
+        organization: Default
+        scm_type: git
+        scm_url: "https://github.com/ericcames/aap.selfservice.git"
+        scm_branch: main
+        scm_clean: true
+        scm_update_on_launch: false
+        state: present
+
+    - name: Sync aap.selfservice project
+      ansible.controller.project_update:
+        name: aap.selfservice
+        organization: Default
+        wait: true
+        interval: 10
+        timeout: 120
+
+    # -------------------------------------------------------------------------
+    # OAuth Application (portal authentication)
+    # redirect_uris is a placeholder — updated by bootstrap_portal.yml once the
+    # portal route is known.
+    # -------------------------------------------------------------------------
+
+    - name: Create portal OAuth application
+      ansible.platform.application:
+        name: aap-selfservice-portal
+        organization: Default
+        authorization_grant_type: authorization-code
+        client_type: confidential
+        redirect_uris:
+          - "https://placeholder.example.com/oauth/callback"
+        state: present
+      register: oauth_app_result
+
+    - name: Show OAuth client_id for portal config
+      ansible.builtin.debug:
+        msg: "OAuth app created — client_id: {{ oauth_app_result.client_id | default('see AAP UI → Applications') }}"
+      when: oauth_app_result.changed
