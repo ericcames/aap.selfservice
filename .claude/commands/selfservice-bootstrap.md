@@ -236,9 +236,9 @@ if results:
 else:
     print('❌ aap.selfservice — NOT FOUND')"
 
-# OAuth application
+# OAuth application — lives in the GATEWAY registry, not the controller
 curl -s -k -H "Authorization: Bearer $TOKEN" \
-  "$CONTROLLER_HOST/api/controller/v2/applications/?name=aap-selfservice-portal" \
+  "$CONTROLLER_HOST/api/gateway/v1/applications/?name=aap-selfservice-portal" \
   | python3 -c "import sys,json; c=json.load(sys.stdin)['count']; print('✅ aap-selfservice-portal (OAuth app)' if c>0 else '❌ aap-selfservice-portal — NOT FOUND')"
 ```
 
@@ -279,7 +279,7 @@ Bootstrap complete.
   OpenShift (aap-portal namespace):
     ✅ <pod name> (Running, ready: 1/1)
 
-Portal URL: https://aap-selfservice-portal-aap-portal.apps.<cluster>
+Portal URL: https://rhaap-portal-aap-portal.apps.<cluster>
 ```
 
 If any object shows ❌, tell the user which object is missing and suggest re-running `/aap-bootstrap` to retry.

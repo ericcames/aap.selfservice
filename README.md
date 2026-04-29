@@ -6,6 +6,8 @@ Repeatable build process for the **Red Hat Ansible Automation Platform Self-Serv
 
 The self-service automation portal gives end users a point-and-click web interface to run automation without needing to understand Ansible playbooks or have direct AAP access. It is built on **Red Hat Developer Hub (RHDH)** and deployed as a Helm chart on OpenShift.
 
+![Portal Templates View](docs/images/portal-logged-in.png)
+
 Key facts:
 - Built on RHDH — included in your AAP subscription, no separate RHDH license required
 - Syncs Organizations, Users, Teams, and Job Templates from AAP Controller
@@ -50,44 +52,17 @@ Before running the bootstrap playbook you need:
 
 1. **AAP Controller** — running and accessible (provided by RHDP Ansible Product Demo)
 2. **OpenShift** — API access with cluster-admin (provided by RHDP Ansible Product Demo)
-3. **AAP OAuth Application** — created in AAP Controller (playbook handles this)
-4. **AAP API Token** — for portal-to-controller authentication (playbook handles this)
-5. **Git Personal Access Token** — GitHub or GitLab PAT for content/template sources
-6. **`oc` CLI** — logged in to the OCP cluster
-7. **`helm` CLI** — available locally
-8. **`~/.ansible/secrets2`** — vault password file (one line: your vault password)
-9. **Ansible collections** — install once, shared across all repos. Your Automation Hub token must be in `~/.ansible/ansible.cfg` under `[galaxy_server.rh_certified]`. Get it from [console.redhat.com](https://console.redhat.com) → Automation Hub → Connect to Hub → API token. Then install:
+3. **Bastion host** — SSH access provided by RHDP Ansible Product Demo
+4. **`oc` CLI** — logged in to the OCP cluster
+5. **`helm` CLI** — available locally
+6. **`~/.ansible/secrets2`** — vault password file (one line: your vault password)
+7. **Ansible collections** — install once, shared across all repos. Your Automation Hub token must be in `~/.ansible/ansible.cfg` under `[galaxy_server.rh_certified]`. Get it from [console.redhat.com](https://console.redhat.com) → Automation Hub → Connect to Hub → API token. Then install:
 
 ```bash
 ANSIBLE_CONFIG=~/.ansible/ansible.cfg ansible-galaxy collection install -r collections/requirements.yml
 ```
 
 Run `/selfservice-first-time` for a guided setup if this is a new machine.
-
-## Setup Steps (High Level)
-
-See [ROADMAP.md](ROADMAP.md) for the full implementation plan.
-
-1. Create AAP OAuth application and API token
-2. Create OCP project (`aap-portal`)
-3. Create OCP secrets for AAP credentials and Git PAT
-4. Deploy `redhat-rhaap-portal` Helm chart
-5. Add portal URL to AAP OAuth application redirect URIs
-6. Configure RBAC for end users
-7. Verify sync of job templates from AAP Controller
-
-## Repository Structure
-
-```
-aap.selfservice/
-├── playbooks/
-│   └── bootstrap_portal.yml   # end-to-end install playbook (planned)
-├── docs/
-│   └── dev-environment.md     # local credentials — gitignored, never commit
-├── README.md
-├── ROADMAP.md
-└── CHANGELOG.md
-```
 
 ## Getting Started
 
@@ -96,4 +71,24 @@ This repo is self-contained. Clone it, run `/selfservice-first-time` in Claude C
 ```
 Step 1 → /selfservice-first-time   (verify local prerequisites)
 Step 2 → /selfservice-bootstrap    (configure AAP + install portal)
+```
+
+## Repository Structure
+
+```
+aap.selfservice/
+├── playbooks/
+│   ├── bootstrap_aap.yml      # configures AAP (Hub creds, vault, project)
+│   └── bootstrap_portal.yml   # deploys portal on OpenShift
+├── docs/
+│   ├── images/                # screenshots and diagrams
+│   └── dev-environment.md     # local credentials — gitignored, never commit
+├── collections/
+│   └── requirements.yml       # pinned collection versions
+├── inventories/
+│   └── rhdp-sample-demo/      # template inventory — copy for each environment
+├── ansible.cfg                # galaxy server config (no tokens)
+├── README.md
+├── ROADMAP.md
+└── CHANGELOG.md
 ```
