@@ -21,6 +21,23 @@ ANSIBLE_CONFIG=~/.ansible/ansible.cfg ansible-galaxy collection install -r colle
 ```
 Otherwise pass the token inline as `ANSIBLE_GALAXY_SERVER_RH_CERTIFIED_TOKEN=<token>`. Collections install to `~/.ansible/collections/`.
 
+## RHDP Environment
+
+This repo targets the **Ansible Product Demo** catalog item on the Red Hat Demo Platform (RHDP). That catalog item provisions:
+
+| Component | Notes |
+|-----------|-------|
+| AAP 2.6 (Controller, Hub, EDA, Gateway) | Admin credentials on RHDP Services page |
+| OpenShift 4.x | API URL and token on RHDP Services page |
+| **Bastion host** | SSH access pre-configured with OCP CLI and common utilities |
+
+The bastion host is always available with this catalog item. When starting a new session, ask the user for:
+1. AAP URL and password (from RHDP Services page)
+2. OCP API URL and token (from RHDP Services page)
+3. Bastion SSH command, port, and password (from RHDP Services page)
+
+Bastion credentials go in `docs/dev-environment.md` (gitignored). Never store them in committed files.
+
 ## Inventory Pattern
 
 Each RHDP environment gets its own named inventory under `inventories/rhdp-<customer>-<demo>/group_vars/all.yml`. Copy `inventories/rhdp-sample-demo/` as a starting point. Sensitive values are **never stored in the inventory** — they are resolved at runtime from environment variables:

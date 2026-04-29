@@ -22,6 +22,12 @@ We'll set up:
   7. Your vault file (secrets the demo uses at runtime)
   8. Your identity defaults (~/.ansible/aap_defaults.yml)
 
+You'll also need your RHDP environment credentials handy:
+  - AAP URL + password (from RHDP Services page)
+  - OCP API URL + token (from RHDP Services page)
+  - Bastion SSH command + password (from RHDP Services page — the Ansible Product Demo
+    catalog item always includes a bastion host with OCP CLI pre-configured)
+
 After this, you'll be ready to run /selfservice-bootstrap.
 ```
 
