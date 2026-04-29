@@ -80,10 +80,13 @@ to function. This replaces the dependency on `aap.as.code`.
 - [x] OAuth redirect URI updated with real portal route
 - [x] Portal running at: `https://rhaap-portal-aap-portal.apps.<cluster>`
 
+**Verified working:** Login → Templates view → Demo Job Template synced from AAP ✅
+
 **Key findings documented in CLAUDE.md:**
-- `pluginMode: oci` is correct; requires `rhaap-portal-dynamic-plugins-registry-auth` secret
-- GitHub/GitLab integrations must be explicitly disabled (`integrations.github: []`) when no SCM token is provided
-- `pluginMode: tarball` requires a `plugin-registry:8080` service not deployed by this chart
+- `pluginMode: oci` requires `rhaap-portal-dynamic-plugins-registry-auth` secret (cluster pull secret)
+- GitHub/GitLab integrations must be explicitly disabled (`integrations.github: []`) when no SCM token provided
+- Gateway app client_secret must be captured at POST creation — never PATCH it (different hashing causes `invalid_client`)
+- Gateway `/o/authorize/` and `/o/token/` use the gateway app registry, NOT the controller's
 
 Build `playbooks/bootstrap_portal.yml` — full portal install on OpenShift.
 Reference: [Installing Self-Service Automation Portal](https://docs.redhat.com/en/documentation/red_hat_ansible_automation_platform/2.6/html/installing_self-service_automation_portal/index)
