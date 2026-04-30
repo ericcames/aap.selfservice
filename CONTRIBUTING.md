@@ -6,7 +6,7 @@
 2. **Branch from `main`** — use the naming pattern `<type>/<short-description>` (e.g. `fix/vault-credential`, `feat/phase4-personas`).
 3. **One fix per PR** — implement, commit, and open a PR for each issue separately before moving to the next.
 4. **Reference the issue** — include `Closes #<number>` in your PR description.
-5. **PRs target `main`** — direct pushes to `main` are not allowed.
+5. **PRs target `main`** — direct pushes to `main` are not allowed. Branch protection is enforced for everyone including repo admins — no exceptions. If an emergency fix is needed, open a PR; it can be merged immediately without a reviewer.
 
 ## Commit messages
 
