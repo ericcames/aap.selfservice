@@ -136,6 +136,7 @@ ANSIBLE_CONFIG=~/.ansible/ansible.cfg ansible-galaxy collection install -r colle
   curl -s -k -X DELETE -H "Authorization: Bearer $TOKEN" "$HOST/api/gateway/v1/tokens/$TOKEN_ID/"
   ```
 - **Helm chart version pinned at 2.1.0** — bump deliberately and document in CHANGELOG.md
+- **✅ for confirmed/verified items in docs** — use the ✅ emoji (green box, white checkmark) in README and documentation files to indicate confirmed capabilities, verified steps, or completed status. It renders natively on GitHub. Emojis are fine in docs; avoid them in code comments and Claude responses.
 - **Real inventory directories are gitignored** — `inventories/rhdp-*/` is in `.gitignore` except for `rhdp-sample-demo/` which is the template; never commit customer/environment-specific inventories
 - **`docs/dev-environment.md` is gitignored** — use it for local credentials and notes; never commit it
 

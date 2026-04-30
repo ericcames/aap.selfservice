@@ -9,11 +9,11 @@ The self-service automation portal gives end users a point-and-click web interfa
 ![Portal Templates View](docs/images/portal-logged-in.png)
 
 Key facts:
-- Built on RHDH — included in your AAP subscription, no separate RHDH license required
-- Syncs Organizations, Users, Teams, and Job Templates from AAP Controller
-- Git-backed software templates define what end users can run
-- RBAC controls which users can see and launch which templates
-- Deployed via the `redhat-rhaap-portal` Helm chart from `charts.openshift.io`
+- ✅ Built on RHDH — included in your AAP subscription, no separate RHDH license required
+- ✅ Syncs Organizations, Users, Teams, and Job Templates from AAP Controller
+- ✅ Git-backed software templates define what end users can run
+- ✅ RBAC controls which users can see and launch which templates
+- ✅ Deployed via the `redhat-rhaap-portal` Helm chart from `charts.openshift.io`
 
 ## Documentation
 
