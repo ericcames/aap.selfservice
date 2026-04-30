@@ -41,29 +41,29 @@ The following was confirmed against a live RHDP Ansible Product Demo cluster:
 
 ### Phase 0 — Repository Setup (Complete)
 
-- [x] Create `aap.selfservice` repo
-- [x] Document architecture and plan in README and ROADMAP
-- [x] Capture documentation links
-- [x] Add `ansible.cfg` (no tokens), `collections/requirements.yml`, CLAUDE.md
-- [x] Establish inventory pattern (`inventories/rhdp-<customer>-<demo>/`)
+- ✅ Create `aap.selfservice` repo
+- ✅ Document architecture and plan in README and ROADMAP
+- ✅ Capture documentation links
+- ✅ Add `ansible.cfg` (no tokens), `collections/requirements.yml`, CLAUDE.md
+- ✅ Establish inventory pattern (`inventories/rhdp-<customer>-<demo>/`)
 
 ### Phase 1 — Local Skills
 
 Build Claude Code skills in `.claude/commands/` so a user arriving at this repo for the
 first time has everything they need without relying on published plugins.
 
-- [x] `/selfservice-first-time` — verify and walk through all local prerequisites
-- [ ] `/selfservice-bootstrap` — generate inventory, run playbooks, verify results
+- ✅ `/selfservice-first-time` — verify and walk through all local prerequisites
+- ⬜ `/selfservice-bootstrap` — generate inventory, run playbooks, verify results
 
 ### Phase 2 — AAP Bootstrap Playbook (Complete)
 
 `playbooks/bootstrap_aap.yml` — minimum AAP configuration needed for the portal
 to function. This replaces the dependency on `aap.as.code`.
 
-- [x] Hub credentials (`Automation Hub - certified`, `Automation Hub - validated`) assigned to Default Organization
-- [x] Vault credential
-- [x] `aap.selfservice` project (synced from `main`)
-- [x] AAP OAuth Application for portal authentication
+- ✅ Hub credentials (`Automation Hub - certified`, `Automation Hub - validated`) assigned to Default Organization
+- ✅ Vault credential
+- ✅ `aap.selfservice` project (synced from `main`)
+- ✅ AAP OAuth Application for portal authentication
 
 **Collections:** `ansible.platform` (OAuth app via gateway API), `ansible.controller` (credentials, project — no platform equivalent exists)
 
@@ -71,14 +71,14 @@ to function. This replaces the dependency on `aap.as.code`.
 
 `playbooks/bootstrap_portal.yml` — full portal install on OpenShift. Tested and working.
 
-- [x] clusterRouterBase derived from OCP API URL
-- [x] OAuth app client_secret rotated and stored in OCP secret
-- [x] AAP service token created (block/rescue cleanup on failure)
-- [x] OCP namespace, secrets-rhaap-portal, secrets-scm
-- [x] `rhaap-portal-dynamic-plugins-registry-auth` secret (cluster pull secret → init container auth)
-- [x] `redhat-rhaap-portal` Helm chart deployed (v2.1.0, pluginMode: oci)
-- [x] OAuth redirect URI updated with real portal route
-- [x] Portal running at: `https://rhaap-portal-aap-portal.apps.<cluster>`
+- ✅ clusterRouterBase derived from OCP API URL
+- ✅ OAuth app client_secret rotated and stored in OCP secret
+- ✅ AAP service token created (block/rescue cleanup on failure)
+- ✅ OCP namespace, secrets-rhaap-portal, secrets-scm
+- ✅ `rhaap-portal-dynamic-plugins-registry-auth` secret (cluster pull secret → init container auth)
+- ✅ `redhat-rhaap-portal` Helm chart deployed (v2.1.0, pluginMode: oci)
+- ✅ OAuth redirect URI updated with real portal route
+- ✅ Portal running at: `https://rhaap-portal-aap-portal.apps.<cluster>`
 
 **Verified working:** Login → Templates view → Demo Job Template synced from AAP ✅
 
