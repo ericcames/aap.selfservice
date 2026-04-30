@@ -11,5 +11,8 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Install ansible-lint
+        run: pip install "ansible-lint==24.12.2" "ansible-core>=2.15,<2.19"
+
       - name: Run ansible-lint
-        uses: ansible/ansible-lint@v24
+        run: ansible-lint playbooks/
