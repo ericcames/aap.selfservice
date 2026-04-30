@@ -91,6 +91,20 @@ Run `/selfservice-first-time` for a guided setup if this is a new machine.
    /selfservice-bootstrap     ← deploy AAP config + portal
    ```
 
+## Accessing the Portal
+
+Once deployed, the portal URL follows this pattern — the cluster ID changes with every RHDP provisioning:
+
+```
+https://rhaap-portal-aap-portal.apps.<cluster-id>.dynamic.redhatworkshops.io
+```
+
+To get the exact URL for your environment:
+
+```bash
+oc get route -n aap-portal
+```
+
 ## Repository Structure
 
 ```
