@@ -1,6 +1,9 @@
 ---
 profile: basic
 
+# Don't attempt to install collections from Galaxy/Hub in CI
+offline: true
+
 exclude_paths:
   - inventories/rhdp-sample-demo/
 
