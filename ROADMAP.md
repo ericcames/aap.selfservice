@@ -39,7 +39,7 @@ The following was confirmed against a live RHDP Ansible Product Demo cluster:
 
 ## Implementation Phases
 
-### Phase 0 — Repository Setup (Complete)
+### Phase 0 — Repository Setup ✅
 
 - ✅ Create `aap.selfservice` repo
 - ✅ Document architecture and plan in README and ROADMAP
@@ -47,7 +47,7 @@ The following was confirmed against a live RHDP Ansible Product Demo cluster:
 - ✅ Add `ansible.cfg` (no tokens), `collections/requirements.yml`, CLAUDE.md
 - ✅ Establish inventory pattern (`inventories/rhdp-<customer>-<demo>/`)
 
-### Phase 1 — Local Skills (Complete)
+### Phase 1 — Local Skills ✅
 
 Build Claude Code skills in `.claude/commands/` so a user arriving at this repo for the
 first time has everything they need without relying on published plugins.
@@ -55,7 +55,7 @@ first time has everything they need without relying on published plugins.
 - ✅ `/selfservice-first-time` — verify and walk through all local prerequisites
 - ✅ `/selfservice-bootstrap` — generate inventory, run playbooks, verify results
 
-### Phase 2 — AAP Bootstrap Playbook (Complete)
+### Phase 2 — AAP Bootstrap Playbook ✅
 
 `playbooks/bootstrap_aap.yml` — minimum AAP configuration needed for the portal
 to function. This replaces the dependency on `aap.as.code`.
@@ -67,7 +67,7 @@ to function. This replaces the dependency on `aap.as.code`.
 
 **Collections:** `ansible.platform` (OAuth app via gateway API), `ansible.controller` (credentials, project — no platform equivalent exists)
 
-### Phase 3 — Portal Bootstrap Playbook (Complete)
+### Phase 3 — Portal Bootstrap Playbook ✅
 
 `playbooks/bootstrap_portal.yml` — full portal install on OpenShift. Tested and working.
 
@@ -101,7 +101,7 @@ Reference: [Installing Self-Service Automation Portal](https://docs.redhat.com/e
 
 **Collections:** `kubernetes.core`
 
-### Phase 4 — Demo Content
+### Phase 4 — Demo Content 🔄
 
 > Planning in progress — see [Issue #1](https://github.com/ericcames/aap.selfservice/issues/1) for the planning discussion. Implementation will not start until that issue is resolved.
 
@@ -113,7 +113,7 @@ Goals:
 - Each persona sees only the job templates relevant to their role
 - Templates use guided forms so non-Ansible users can self-service
 
-### Phase 5 — RBAC Configuration
+### Phase 5 — RBAC Configuration ⬜
 
 Automate the RBAC setup from the configuration guide:
 [Configuring Self-Service Automation Portal](https://docs.redhat.com/en/documentation/red_hat_ansible_automation_platform/2.6/html/configuring_self-service_automation_portal/index)
