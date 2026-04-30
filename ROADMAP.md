@@ -103,6 +103,8 @@ Reference: [Installing Self-Service Automation Portal](https://docs.redhat.com/e
 
 ### Phase 4 — Demo Content
 
+> Planning in progress — see [Issue #1](https://github.com/ericcames/aap.selfservice/issues/1) for the planning discussion. Implementation will not start until that issue is resolved.
+
 Define and automate demo personas and content so the portal tells a compelling customer story.
 Exact job templates and user personas TBD — decided when portal integration is validated.
 
