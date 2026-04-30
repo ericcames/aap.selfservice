@@ -1,16 +1,12 @@
 ---
+# For local use only — requires ansible.platform and ansible.controller
+# collections installed via Automation Hub. Not used in CI.
 profile: basic
 
-# Don't attempt to install collections from Galaxy/Hub in CI
 offline: true
 
 exclude_paths:
   - inventories/rhdp-sample-demo/
-
-# syntax-check requires collections installed — skip it since Automation Hub
-# credentials aren't available in CI. YAML quality rules still run.
-skip_list:
-  - syntax-check
 
 warn_list:
   - fqcn

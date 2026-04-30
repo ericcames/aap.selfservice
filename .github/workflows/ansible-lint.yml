@@ -1,18 +1,18 @@
 ---
-name: Ansible Lint
+name: YAML Lint
 
 on:
   pull_request:
     branches: [main]
 
 jobs:
-  ansible-lint:
+  yamllint:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
 
-      - name: Install ansible-lint
-        run: pip install "ansible-lint==24.12.2" "ansible-core>=2.15,<2.19"
+      - name: Install yamllint
+        run: pip install yamllint
 
-      - name: Run ansible-lint
-        run: ansible-lint playbooks/
+      - name: Run yamllint
+        run: yamllint playbooks/ inventories/rhdp-sample-demo/ collections/
