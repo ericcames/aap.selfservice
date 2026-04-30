@@ -20,7 +20,11 @@ All notable changes to this project will be documented in this file.
 ### Changed
 - ROADMAP updated with architecture decisions: self-contained repo (no aap.as.code dependency), local skills, phased build order
 - README updated with collection install instructions
+- README Prerequisites section now includes RHDP catalog item screenshot and link so new users know which demo to order
 - `.gitignore` updated to track `collections/requirements.yml`
+
+### Added
+- `docs/images/redhatdemo.png` — Ansible Product Demo catalog item screenshot for onboarding
 
 ## [0.1.0] — 2026-04-27
 

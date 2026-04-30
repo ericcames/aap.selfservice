@@ -50,6 +50,10 @@ RHDP Ansible Product Demo
 
 Before running the bootstrap playbook you need:
 
+Order the **Ansible Product Demo** catalog item from the [Red Hat Demo Platform (RHDP)](https://demo.redhat.com) — it provisions items 1–3 automatically.
+
+![Ansible Product Demo catalog item](docs/images/redhatdemo.png)
+
 1. **AAP Controller** — running and accessible (provided by RHDP Ansible Product Demo)
 2. **OpenShift** — API access with cluster-admin (provided by RHDP Ansible Product Demo)
 3. **Bastion host** — SSH access provided by RHDP Ansible Product Demo
