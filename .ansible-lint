@@ -1,0 +1,10 @@
+---
+profile: basic
+
+exclude_paths:
+  - inventories/rhdp-sample-demo/
+
+# Warn rather than fail on rules that require live collection resolution
+warn_list:
+  - fqcn
+  - no-changed-when
