@@ -1,0 +1,13 @@
+---
+# For local use only — requires ansible.platform and ansible.controller
+# collections installed via Automation Hub. Not used in CI.
+profile: basic
+
+offline: true
+
+exclude_paths:
+  - inventories/rhdp-sample-demo/
+
+warn_list:
+  - fqcn
+  - no-changed-when
