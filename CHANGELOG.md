@@ -4,6 +4,12 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+### Fixed
+- `selfservice-bootstrap` skill: corrected stale skill name references (`/aap-first-time` → `/selfservice-first-time`, `/aap-bootstrap` → `/selfservice-bootstrap`)
+
+### Changed
+- ROADMAP Phase 1 marked complete
+
 ### Added
 - `playbooks/bootstrap_aap.yml` — configures AAP for portal: Hub credentials, vault credential, aap.selfservice project, OAuth application
 - `playbooks/bootstrap_portal.yml` — deploys redhat-rhaap-portal Helm chart on OpenShift with full OCI plugin auth and OAuth wiring

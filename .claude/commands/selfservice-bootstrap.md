@@ -4,7 +4,7 @@ This skill bootstraps a fresh RHDP environment for the self-service portal demo.
 
 See [`.claude/commands/references/context.md`](references/context.md) for object names and API endpoints.
 
-When complete, the AAP instance is configured and the portal is running. Run `/aap-first-time` first if this is a new machine.
+When complete, the AAP instance is configured and the portal is running. Run `/selfservice-first-time` first if this is a new machine.
 
 ## Preflight Check
 
@@ -40,7 +40,7 @@ try:
     missing = [k for k in ['my_vault','my_remote_vault','my_remote_ssh_pub_key'] if not d.get(k,'')]
     print('❌ ~/.ansible/aap_defaults.yml missing: ' + ', '.join(missing) if missing else '✅ ~/.ansible/aap_defaults.yml')
 except FileNotFoundError:
-    print('❌ ~/.ansible/aap_defaults.yml — not found. Run /aap-first-time.')
+    print('❌ ~/.ansible/aap_defaults.yml — not found. Run /selfservice-first-time.')
 "
 ```
 
@@ -48,7 +48,7 @@ If any check fails, stop and tell the user:
 ```
 ❌ Prerequisites missing: <list each failing item>
 
-Run /aap-first-time to set up these prerequisites before bootstrapping.
+Run /selfservice-first-time to set up these prerequisites before bootstrapping.
 ```
 
 ## Step 1 — Identify the Environment
@@ -282,7 +282,7 @@ Bootstrap complete.
 Portal URL: https://rhaap-portal-aap-portal.apps.<cluster>
 ```
 
-If any object shows ❌, tell the user which object is missing and suggest re-running `/aap-bootstrap` to retry.
+If any object shows ❌, tell the user which object is missing and suggest re-running `/selfservice-bootstrap` to retry.
 
 ### On failure
 

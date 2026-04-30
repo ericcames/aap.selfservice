@@ -47,13 +47,13 @@ The following was confirmed against a live RHDP Ansible Product Demo cluster:
 - ✅ Add `ansible.cfg` (no tokens), `collections/requirements.yml`, CLAUDE.md
 - ✅ Establish inventory pattern (`inventories/rhdp-<customer>-<demo>/`)
 
-### Phase 1 — Local Skills
+### Phase 1 — Local Skills (Complete)
 
 Build Claude Code skills in `.claude/commands/` so a user arriving at this repo for the
 first time has everything they need without relying on published plugins.
 
 - ✅ `/selfservice-first-time` — verify and walk through all local prerequisites
-- ⬜ `/selfservice-bootstrap` — generate inventory, run playbooks, verify results
+- ✅ `/selfservice-bootstrap` — generate inventory, run playbooks, verify results
 
 ### Phase 2 — AAP Bootstrap Playbook (Complete)
 
