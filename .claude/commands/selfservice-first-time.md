@@ -25,8 +25,9 @@ We'll set up:
 You'll also need your RHDP environment credentials handy:
   - AAP URL + password (from RHDP Services page)
   - OCP API URL + token (from RHDP Services page)
-  - Bastion SSH command + password (from RHDP Services page — the Ansible Product Demo
-    catalog item always includes a bastion host with OCP CLI pre-configured)
+
+  Note: the bastion host is NOT required. Bootstrap runs from your laptop directly.
+  The bastion is available for troubleshooting if you can't reach the OCP API.
 
 After this, you'll be ready to run /selfservice-bootstrap.
 ```
