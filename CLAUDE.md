@@ -34,9 +34,10 @@ This repo targets the **Ansible Product Demo** catalog item on the Red Hat Demo 
 The bastion host is always available with this catalog item. When starting a new session, ask the user for:
 1. AAP URL and password (from RHDP Services page)
 2. OCP API URL and token (from RHDP Services page)
-3. Bastion SSH command, port, and password (from RHDP Services page)
 
-Bastion credentials go in `docs/dev-environment.md` (gitignored). Never store them in committed files.
+The bastion is **not required** — bootstrap playbooks run locally via `connection: local` and talk to AAP and OCP over HTTPS directly. Verified 2026-04-30: full bootstrap completed from a laptop without bastion access. Only ask for bastion credentials if the user cannot reach the OCP API directly (firewall/VPN issues) or needs interactive cluster troubleshooting.
+
+Credentials go in `docs/dev-environment.md` (gitignored). Never store them in committed files.
 
 ## Inventory Pattern
 

@@ -287,3 +287,14 @@ If any object shows ❌, tell the user which object is missing and suggest re-ru
 ### On failure
 
 Show the error from the playbook output and suggest the most likely fix based on the error message.
+
+If the user cannot reach the OCP API or AAP URL directly (connection timeout, TLS errors that suggest a network path issue), ask for bastion credentials and offer to walk through connecting via the bastion:
+
+```
+The RHDP Ansible Product Demo always includes a bastion host with oc CLI pre-configured.
+If your laptop can't reach the cluster directly, you can run the playbooks from the bastion.
+
+Get from RHDP Services page:
+  - Bastion SSH command (e.g. ssh lab-user@ssh.ocpv05.rhdp.net -p <port>)
+  - Bastion password
+```
