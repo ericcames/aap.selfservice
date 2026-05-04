@@ -6,6 +6,7 @@ All notable changes to this project will be documented in this file.
 
 ### Fixed
 - `selfservice-bootstrap` skill: corrected stale skill name references (`/aap-first-time` → `/selfservice-first-time`, `/aap-bootstrap` → `/selfservice-bootstrap`)
+- README: removed inaccurate claim that RHDH is included with an AAP subscription (RHDH requires a separate entitlement)
 
 ### Changed
 - ROADMAP Phase 1 marked complete
