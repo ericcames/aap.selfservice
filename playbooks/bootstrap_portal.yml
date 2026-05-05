@@ -75,11 +75,13 @@
           skip_authorization: false
         status_code: 201
       register: oauth_app_created
+      no_log: true
 
     - name: Set OAuth credentials from creation response
       ansible.builtin.set_fact:
         oauth_client_id: "{{ oauth_app_created.json.client_id }}"
         oauth_client_secret: "{{ oauth_app_created.json.client_secret }}"
+      no_log: true
 
     # -------------------------------------------------------------------------
     # OCP namespace + secrets + portal token
@@ -108,6 +110,7 @@
             scope: write
             state: present
           register: portal_token_result
+          no_log: true
 
         - name: Create secrets-rhaap-portal secret
           kubernetes.core.k8s:
@@ -138,6 +141,7 @@
             api_key: "{{ k8s_auth.api_key }}"
             validate_certs: "{{ k8s_auth.validate_certs }}"
           register: cluster_pull_secret
+          no_log: true
 
         - name: Create OCI registry auth secret for init container
           # The chart mounts rhaap-portal-dynamic-plugins-registry-auth at

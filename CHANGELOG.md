@@ -20,6 +20,7 @@ All notable changes to this project will be documented in this file.
 - `docs/images/redhatdemo.png` — Ansible Product Demo catalog item screenshot for onboarding
 
 ### Fixed
+- Security: added `no_log: true` to tasks in `bootstrap_portal.yml` that register OAuth client_secret, AAP bearer token, and cluster pull secret — previously exposed in plaintext when running with `-v` (resolves #26)
 - Portal login failure for users in non-Default AAP organizations: Helm chart defaults `catalog.providers.rhaap.production.orgs` to `Default` only; `sync_portal_orgs.yml` now patches the configmap with the full org list queried live from AAP (resolves #18)
 - Templates not visible to non-admin users: Helm chart enables Backstage RBAC (`permission.enabled: true`) with no policies, which defaults to deny-all for non-admins; `sync_portal_orgs.yml` disables permission enforcement — actual access control is enforced by AAP at job launch time (resolves #18)
 - Catalog not populated for 60 minutes after deploy: Helm chart defaults both sync providers to `frequency: minutes: 60`; `sync_portal_orgs.yml` patches both to `minutes: 1` so templates and users appear within one minute of deployment (resolves #18)
