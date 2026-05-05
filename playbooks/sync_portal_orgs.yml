@@ -1,0 +1,133 @@
+---
+- name: Sync portal org list from AAP
+  hosts: localhost
+  connection: local
+  gather_facts: false
+
+  vars:
+    k8s_auth:
+      host: "{{ ocp_host }}"
+      api_key: "{{ ocp_token }}"
+      validate_certs: false
+
+  tasks:
+
+    # -------------------------------------------------------------------------
+    # Fetch all AAP organizations
+    # -------------------------------------------------------------------------
+
+    - name: Get all organizations from AAP Controller
+      ansible.builtin.uri:
+        url: "{{ aap_hostname }}/api/controller/v2/organizations/?page_size=200"
+        method: GET
+        url_username: "{{ aap_username }}"
+        url_password: "{{ aap_password }}"
+        force_basic_auth: true
+        validate_certs: "{{ aap_validate_certs }}"
+      register: org_response
+
+    - name: Build org name list
+      ansible.builtin.set_fact:
+        aap_org_names: "{{ org_response.json.results | map(attribute='name') | list }}"
+
+    - name: Show orgs that will be configured
+      ansible.builtin.debug:
+        msg: "Configuring portal to allow users from: {{ aap_org_names }}"
+
+    # -------------------------------------------------------------------------
+    # Patch portal configmap
+    # -------------------------------------------------------------------------
+
+    - name: Get current portal app-config configmap
+      kubernetes.core.k8s_info:
+        api_version: v1
+        kind: ConfigMap
+        name: rhaap-portal-app-config
+        namespace: "{{ portal_namespace }}"
+        host: "{{ k8s_auth.host }}"
+        api_key: "{{ k8s_auth.api_key }}"
+        validate_certs: "{{ k8s_auth.validate_certs }}"
+      register: app_config_cm
+
+    - name: Fail if portal configmap not found
+      ansible.builtin.fail:
+        msg: "rhaap-portal-app-config not found in {{ portal_namespace }}. Run bootstrap_portal.yml first."
+      when: app_config_cm.resources | length == 0
+
+    - name: Parse current app-config
+      ansible.builtin.set_fact:
+        current_app_config: "{{ app_config_cm.resources[0].data['app-config.yaml'] | from_yaml }}"
+
+    - name: Build updated app-config with current AAP orgs, fast sync, and open permissions
+      ansible.builtin.set_fact:
+        updated_app_config: >-
+          {{ current_app_config | combine(
+            {
+              'catalog': {'providers': {'rhaap': {'production': {
+                'orgs': aap_org_names,
+                'sync': {
+                  'orgsUsersTeams': {'schedule': {'frequency': {'minutes': 1}}},
+                  'jobTemplates': {'enabled': true, 'schedule': {'frequency': {'minutes': 1}}}
+                }
+              }}}},
+              'permission': {'enabled': false}
+            },
+            recursive=True
+          ) }}
+
+    - name: Patch portal app-config configmap
+      kubernetes.core.k8s:
+        state: present
+        host: "{{ k8s_auth.host }}"
+        api_key: "{{ k8s_auth.api_key }}"
+        validate_certs: "{{ k8s_auth.validate_certs }}"
+        definition:
+          apiVersion: v1
+          kind: ConfigMap
+          metadata:
+            name: rhaap-portal-app-config
+            namespace: "{{ portal_namespace }}"
+          data:
+            app-config.yaml: "{{ updated_app_config | to_nice_yaml(indent=2) }}"
+
+    # -------------------------------------------------------------------------
+    # Restart portal to apply new config
+    # -------------------------------------------------------------------------
+
+    - name: Restart portal deployment
+      kubernetes.core.k8s:
+        state: patched
+        host: "{{ k8s_auth.host }}"
+        api_key: "{{ k8s_auth.api_key }}"
+        validate_certs: "{{ k8s_auth.validate_certs }}"
+        api_version: apps/v1
+        kind: Deployment
+        name: rhaap-portal
+        namespace: "{{ portal_namespace }}"
+        definition:
+          spec:
+            template:
+              metadata:
+                annotations:
+                  kubectl.kubernetes.io/restartedAt: "{{ now(utc=True, fmt='%Y-%m-%dT%H:%M:%SZ') }}"
+
+    - name: Wait for portal to be ready
+      kubernetes.core.k8s_info:
+        api_version: apps/v1
+        kind: Deployment
+        name: rhaap-portal
+        namespace: "{{ portal_namespace }}"
+        host: "{{ k8s_auth.host }}"
+        api_key: "{{ k8s_auth.api_key }}"
+        validate_certs: "{{ k8s_auth.validate_certs }}"
+      register: portal_deploy
+      retries: 20
+      delay: 15
+      until: >
+        portal_deploy.resources | length > 0 and
+        portal_deploy.resources[0].status.availableReplicas is defined and
+        portal_deploy.resources[0].status.availableReplicas >= 1
+
+    - name: Show configured org list
+      ansible.builtin.debug:
+        msg: "Portal updated. Users in these AAP organizations can now log in: {{ aap_org_names }}"

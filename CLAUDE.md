@@ -166,10 +166,23 @@ Key Helm values to configure:
 ```
 bootstrap_aap.yml    → Hub creds, vault, project, OAuth app (ansible.platform)
 bootstrap_portal.yml → OCP project, secrets, Helm chart, OAuth wiring (kubernetes.core)
-site.yml             → runs both in sequence (full from-scratch deploy)
+sync_portal_orgs.yml → Query AAP for all orgs, patch portal configmap, restart pod
+site.yml             → runs all three in sequence (full from-scratch deploy)
 ```
 
-Both playbooks are idempotent and can be run independently.
+All playbooks are idempotent and can be run independently.
+
+`sync_portal_orgs.yml` must be run after `bootstrap_portal.yml` because the Helm chart sets several defaults that are wrong for a demo environment. It can also be run standalone anytime orgs, teams, or users change in AAP. It applies three fixes in one configmap patch:
+
+| Setting | Chart default | Applied value | Why |
+|---------|--------------|---------------|-----|
+| `catalog.providers.rhaap.production.orgs` | `Default` only | All AAP orgs (dynamic) | Users in non-Default orgs can't log in otherwise |
+| `catalog.providers.rhaap.production.sync.*.schedule.frequency` | `minutes: 60` | `minutes: 1` | 60-minute default makes portal unusable after fresh deploy |
+| `permission.enabled` | `true` | `false` | RBAC defaults to deny-all for non-admins; real enforcement happens in AAP |
+
+**Portal login requirement:** Users must be a member of an AAP organization AND a member of a team within that organization to log in to the portal. Granting a user access to a job template alone is not sufficient. `sync_portal_orgs.yml` ensures every AAP org is in the portal's allowed list; org/team membership in AAP controls who can actually authenticate.
+
+**Template visibility:** With `permission.enabled: false`, all authenticated portal users see all synced templates. AAP enforces actual execution permissions — users can only successfully launch templates they have Execute access to in AAP.
 
 ## No Dependency on aap.as.code
 
