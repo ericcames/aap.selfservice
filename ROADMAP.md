@@ -53,7 +53,8 @@ Build Claude Code skills in `.claude/commands/` so a user arriving at this repo 
 first time has everything they need without relying on published plugins.
 
 - ✅ `/selfservice-first-time` — verify and walk through all local prerequisites
-- ✅ `/selfservice-bootstrap` — generate inventory, run playbooks, verify results
+- ✅ `/selfservice-bootstrap` — generate inventory, run all three playbooks, verify results
+- ✅ `/selfservice-sync` — re-sync portal org list, permissions, and sync frequency after AAP changes
 
 ### Phase 2 — AAP Bootstrap Playbook ✅
 
@@ -95,7 +96,8 @@ Reference: [Installing Self-Service Automation Portal](https://docs.redhat.com/e
 1. Create OCP project (`aap-portal`)
 2. Create OCP secrets (`aap-auth`, `git-auth`)
 3. Deploy `redhat-rhaap-portal` Helm chart (v2.1.0, pinned) from `https://charts.openshift.io`
-   - Key values: `clusterRouterBase`, `pluginMode: oci`, `catalog.providers.rhaap.orgs`
+   - Key values: `clusterRouterBase`, `pluginMode: oci`
+   - Note: `catalog.providers.rhaap.orgs` cannot be cleanly overridden via Helm values (chart uses a template expression as a YAML key causing DUPLICATE_KEY on merge); patched post-deploy by `sync_portal_orgs.yml` instead
 4. Update AAP OAuth redirect URI with portal route
 5. Poll portal `/healthz` and verify job template sync
 
@@ -127,10 +129,12 @@ Automate the RBAC setup from the configuration guide:
 ```
 bootstrap_aap.yml      → configure AAP (Hub creds, vault, project, OAuth app)
 bootstrap_portal.yml   → install portal on OCP and wire to AAP
+sync_portal_orgs.yml   → patch portal configmap: org list, permissions, sync frequency
 ```
 
-Both playbooks are idempotent and can be run independently. A top-level `site.yml`
-will orchestrate them in sequence for a full from-scratch deploy.
+All three playbooks are idempotent and can be run independently. `site.yml` orchestrates
+all three in sequence for a full from-scratch deploy. Run `/selfservice-bootstrap` to
+execute the full sequence with guided credential collection and verification.
 
 ## Inventory Design
 
@@ -149,6 +153,10 @@ See `inventories/rhdp-sample-demo/` for the template.
 
 ## Open Questions
 
-- Which AAP organization should be synced by default for demos? (`Default` org assumed)
 - Should Git PAT be required at bootstrap, or can template content be deferred to Phase 4?
-- Should the portal token be long-lived (stored in OCP secret) or short-lived (generated per run)?
+
+## Resolved Questions
+
+- **Which AAP organizations should the portal sync?** — `sync_portal_orgs.yml` queries AAP at run time and syncs all current organizations dynamically. No hardcoded list.
+- **Should the portal token be long-lived or short-lived?** — Long-lived (stored in OCP secret as `aap-selfservice-portal service token`). Short-lived tokens would expire and break the portal backend.
+- **How does portal login work for users not in the Default org?** — Users must be a member of an AAP organization AND a team within that org. `sync_portal_orgs.yml` ensures every org is in the allowed list. Template access is visible to all authenticated users; AAP enforces execute permissions at job launch time.
