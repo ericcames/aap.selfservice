@@ -167,7 +167,7 @@ Key Helm values to configure:
 bootstrap_aap.yml    → Hub creds, vault, project, OAuth app (ansible.platform)
 bootstrap_portal.yml → OCP project, secrets, Helm chart, OAuth wiring (kubernetes.core)
 sync_portal_orgs.yml → Query AAP for all orgs, patch portal configmap, restart pod
-site.yml             → runs all three in sequence (full from-scratch deploy)
+playbooks/site.yml   → runs all three in sequence (full from-scratch deploy)
 ```
 
 All playbooks are idempotent and can be run independently.

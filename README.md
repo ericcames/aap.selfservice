@@ -110,8 +110,8 @@ aap.selfservice/
 ├── playbooks/
 │   ├── bootstrap_aap.yml      # configures AAP (Hub creds, vault, project)
 │   ├── bootstrap_portal.yml   # deploys portal on OpenShift
-│   └── sync_portal_orgs.yml   # patches portal configmap with live AAP org list
-├── site.yml                   # runs all three playbooks in sequence
+│   ├── sync_portal_orgs.yml   # patches portal configmap with live AAP org list
+│   └── site.yml               # runs all three playbooks in sequence
 ├── .claude/commands/
 │   ├── selfservice-first-time.md  # skill: first-time prerequisite setup
 │   ├── selfservice-bootstrap.md   # skill: deploy AAP config + portal
