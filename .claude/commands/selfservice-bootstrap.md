@@ -1,10 +1,10 @@
 # AAP Self-Service Bootstrap
 
-This skill bootstraps a fresh RHDP environment for the self-service portal demo. It collects credentials, generates a named inventory, runs `playbooks/bootstrap_aap.yml` to configure AAP, then runs `playbooks/bootstrap_portal.yml` to install the portal on OpenShift.
+This skill bootstraps a fresh RHDP environment for the self-service portal demo. It collects credentials, generates a named inventory, then runs all three playbooks in sequence: `bootstrap_aap.yml` (configure AAP), `bootstrap_portal.yml` (deploy portal on OpenShift), and `sync_portal_orgs.yml` (patch portal configmap with correct orgs, sync frequency, and permissions).
 
 See [`.claude/commands/references/context.md`](references/context.md) for object names and API endpoints.
 
-When complete, the AAP instance is configured and the portal is running. Run `/selfservice-first-time` first if this is a new machine.
+When complete, the AAP instance is configured and the portal is running and usable. Run `/selfservice-first-time` first if this is a new machine.
 
 ## Preflight Check
 
@@ -187,6 +187,25 @@ Show this command and ask for confirmation before running:
 ansible-playbook -i inventories/rhdp-<customer>-<demo>/ playbooks/bootstrap_portal.yml \
   --vault-password-file ~/.ansible/secrets2
 ```
+
+## Step 6a — Run sync_portal_orgs.yml
+
+This step is required after every portal deploy. The Helm chart sets three defaults that break the portal for non-admin users:
+- `orgs: Default` only — users in other AAP orgs can't log in
+- `permission.enabled: true` with no policies — RBAC denies all non-admins
+- Sync frequency `minutes: 60` — catalog is empty for an hour after deploy
+
+`sync_portal_orgs.yml` patches all three in one configmap update. Show this command and run it (no confirmation needed — it is safe and idempotent):
+
+```bash
+ansible-playbook -i inventories/rhdp-<customer>-<demo>/ playbooks/sync_portal_orgs.yml \
+  --vault-password-file ~/.ansible/secrets2
+```
+
+Expected output includes:
+- `"Configuring portal to allow users from: [...]"` — lists all AAP orgs found
+- `changed` on the configmap patch and deployment restart tasks
+- `"Portal updated. Users in these AAP organizations can now log in: [...]"`
 
 ## Step 7 — Verify Results
 
