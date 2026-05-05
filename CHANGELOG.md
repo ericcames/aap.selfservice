@@ -4,7 +4,14 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+### Added
+- `playbooks/sync_portal_orgs.yml` — queries AAP for all current organizations and patches the portal configmap live; run after `bootstrap_portal.yml` or standalone anytime orgs/teams/users change in AAP
+- `site.yml` — full from-scratch deploy: runs `bootstrap_aap.yml`, `bootstrap_portal.yml`, and `sync_portal_orgs.yml` in sequence
+
 ### Fixed
+- Portal login failure for users in non-Default AAP organizations: Helm chart defaults `catalog.providers.rhaap.production.orgs` to `Default` only; `sync_portal_orgs.yml` now patches the configmap with the full org list queried live from AAP (resolves issue #18)
+- Templates not visible to non-admin users: Helm chart enables Backstage RBAC (`permission.enabled: true`) with no policies, which defaults to deny-all for non-admins; `sync_portal_orgs.yml` disables permission enforcement — actual access control is enforced by AAP at job launch time (resolves issue #18)
+- Catalog not populated for 60 minutes after deploy: Helm chart defaults both sync providers to `frequency: minutes: 60`; `sync_portal_orgs.yml` patches both to `minutes: 1` so templates and users appear within one minute of deployment (resolves issue #18)
 - `selfservice-bootstrap` skill: corrected stale skill name references (`/aap-first-time` → `/selfservice-first-time`, `/aap-bootstrap` → `/selfservice-bootstrap`)
 - README: removed inaccurate claim that RHDH is included with an AAP subscription (RHDH requires a separate entitlement)
 
