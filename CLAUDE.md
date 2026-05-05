@@ -197,7 +197,8 @@ All skills for this repo live in `.claude/commands/` (repo-local):
 | Command | File | Purpose |
 |---------|------|---------|
 | `/selfservice-first-time` | `selfservice-first-time.md` | First-time prerequisite setup |
-| `/selfservice-bootstrap` | `selfservice-bootstrap.md` | Generate inventory, run playbooks, verify |
+| `/selfservice-bootstrap` | `selfservice-bootstrap.md` | Generate inventory, run all three playbooks, verify |
+| `/selfservice-sync` | `selfservice-sync.md` | Re-sync portal orgs/permissions/frequency after AAP changes |
 
 Do not use `/aap-skills:aap-first-time` or `/aap-skills:aap-bootstrap` — those are
 coupled to `aap.as.code` and will fail in this repo.
