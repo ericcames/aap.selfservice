@@ -132,9 +132,10 @@ bootstrap_portal.yml   → install portal on OCP and wire to AAP
 sync_portal_orgs.yml   → patch portal configmap: org list, permissions, sync frequency
 ```
 
-All three playbooks are idempotent and can be run independently. `site.yml` orchestrates
-all three in sequence for a full from-scratch deploy. Run `/selfservice-bootstrap` to
-execute the full sequence with guided credential collection and verification.
+All three playbooks are idempotent and can be run independently. `playbooks/site.yml`
+orchestrates all three in sequence for a full from-scratch deploy. Run
+`/selfservice-bootstrap` to execute the full sequence with guided credential collection
+and verification.
 
 ## Inventory Design
 

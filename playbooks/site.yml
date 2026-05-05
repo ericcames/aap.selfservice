@@ -1,0 +1,4 @@
+---
+- ansible.builtin.import_playbook: bootstrap_aap.yml
+- ansible.builtin.import_playbook: bootstrap_portal.yml
+- ansible.builtin.import_playbook: sync_portal_orgs.yml
