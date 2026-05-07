@@ -12,7 +12,6 @@ This repo is run **after** `aap.as.code` has bootstrapped AAP and loaded demo co
 
 - `oc` — must be logged in to the OCP cluster before running any playbook
 - `helm` — must be available locally
-- `~/.ansible/secrets2` — vault password file (same file used by `aap.as.code`)
 - Collections: `ansible.platform` (AAP API), `kubernetes.core` (OCP/Helm)
 
 Install collections once (shared across all repos). If the Hub token is already in `~/.ansible/ansible.cfg`:
@@ -55,9 +54,7 @@ Each RHDP environment gets its own named inventory under `inventories/rhdp-<cust
 
 ```bash
 # Set env vars for the target environment, then:
-ansible-playbook playbooks/bootstrap_portal.yml \
-  -i inventories/rhdp-<customer>-<demo>/ \
-  --vault-password-file ~/.ansible/secrets2
+ansible-playbook playbooks/bootstrap_portal.yml -i inventories/rhdp-<customer>-<demo>/
 ```
 
 ## AAP Gateway OAuth — Critical Facts

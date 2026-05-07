@@ -14,11 +14,9 @@ This takes about 10 minutes the first time.
 
 We'll set up:
   1. Your Automation Hub API token (~/.ansible/ansible.cfg)
-  2. Your vault password file (~/.ansible/secrets2)
-  3. Required Ansible collections (ansible.platform, ansible.controller, kubernetes.core)
-  4. oc CLI — logged in to OpenShift
-  5. helm CLI — available locally
-  6. Your identity defaults (~/.ansible/aap_defaults.yml)
+  2. Required Ansible collections (ansible.platform, ansible.controller, kubernetes.core)
+  3. oc CLI — logged in to OpenShift
+  4. helm CLI — available locally
 
 You'll also need your RHDP environment credentials handy:
   - AAP URL + password (from RHDP Services page)
@@ -59,9 +57,6 @@ grep -q "galaxy_server.rh_certified" ~/.ansible/ansible.cfg 2>/dev/null && \
   grep -v "PASTE_YOUR_TOKEN_HERE" ~/.ansible/ansible.cfg | grep -q "token=" && \
   echo "EXISTS: ansible.cfg with Hub token" || echo "MISSING: ansible.cfg or Hub token"
 
-# secrets2
-test -s ~/.ansible/secrets2 && echo "EXISTS: secrets2" || echo "MISSING: secrets2"
-
 # collections
 test -d ~/.ansible/collections/ansible_collections/ansible/platform && \
   echo "EXISTS: ansible.platform" || echo "MISSING: ansible.platform"
@@ -75,19 +70,6 @@ oc whoami 2>/dev/null && echo "EXISTS: oc — logged in as $(oc whoami)" || echo
 
 # helm CLI
 helm version --short 2>/dev/null && echo "EXISTS: helm" || echo "MISSING: helm"
-
-# user defaults
-python3 -c "
-import yaml, os
-path = os.path.expanduser('~/.ansible/aap_defaults.yml')
-try:
-    d = yaml.safe_load(open(path)) or {}
-    for k in ['my_vault']:
-        v = d.get(k,'')
-        print(('EXISTS: ' if v else 'MISSING: ') + k + (': ' + str(v) if v else ''))
-except FileNotFoundError:
-    print('MISSING: ~/.ansible/aap_defaults.yml')
-"
 ```
 
 Print a summary of what was found before proceeding. Skip any step below where the item already exists and is valid.
@@ -127,27 +109,7 @@ grep -v "PASTE_YOUR_TOKEN_HERE" ~/.ansible/ansible.cfg | grep -q "token=" && \
   echo "✅ ~/.ansible/ansible.cfg written" || echo "❌ token not set correctly"
 ```
 
-## Step 3 — secrets2 Setup
-
-Skip if `~/.ansible/secrets2` exists and is non-empty.
-
-Explain:
-```
-~/.ansible/secrets2 contains one line: your vault password.
-This is used to decrypt your vault file at runtime.
-```
-
-Prompt the user for their vault password, then write it as a single line:
-
-```bash
-mkdir -p ~/.ansible
-touch ~/.ansible/secrets2
-chmod 600 ~/.ansible/secrets2
-```
-
-Confirm the file is non-empty after writing.
-
-## Step 4 — Collections Install
+## Step 3 — Collections Install
 
 Skip if all three collections are found by `ansible-galaxy collection list` (they may be at `~/.ansible/collections/` or the system Python path).
 
@@ -171,7 +133,7 @@ ansible-galaxy collection list 2>/dev/null | grep -q "^kubernetes.core" && \
 
 If any are missing after install, report the error and stop.
 
-## Step 5 — oc CLI Check
+## Step 4 — oc CLI Check
 
 Skip if `oc whoami` returns a username.
 
@@ -187,7 +149,7 @@ Validate after login:
 oc whoami && echo "✅ oc — logged in" || echo "❌ oc — not logged in"
 ```
 
-## Step 6 — helm CLI Check
+## Step 5 — helm CLI Check
 
 Skip if `helm version` succeeds.
 
@@ -199,45 +161,12 @@ Validate:
 helm version --short && echo "✅ helm" || echo "❌ helm — not found"
 ```
 
-## Step 7 — User Identity Defaults
-
-Write to `~/.ansible/aap_defaults.yml`. Skip any key that already has a non-empty value.
-
-Ask for each missing value:
-
-- **`my_vault`** — name for your vault credential in AAP (e.g. `Eric Ames`)
-
-Write/merge using Python:
-
-```bash
-python3 << 'EOF'
-import yaml, os
-
-path = os.path.expanduser('~/.ansible/aap_defaults.yml')
-updates = {
-    'my_vault': '<value>',
-}
-
-try:
-    existing = yaml.safe_load(open(path)) or {}
-except FileNotFoundError:
-    existing = {}
-
-existing.update({k: v for k, v in updates.items() if v})
-with open(path, 'w') as f:
-    yaml.dump(existing, f, default_flow_style=False)
-print('✅ ~/.ansible/aap_defaults.yml written')
-EOF
-```
-
-## Step 8 — Final Validation
+## Step 6 — Final Validation
 
 ```bash
 grep -q "galaxy_server.rh_certified" ~/.ansible/ansible.cfg 2>/dev/null && \
   grep -v "PASTE_YOUR_TOKEN_HERE" ~/.ansible/ansible.cfg | grep -q "token=" && \
   echo "✅ ~/.ansible/ansible.cfg" || echo "❌ ~/.ansible/ansible.cfg"
-
-test -s ~/.ansible/secrets2 && echo "✅ ~/.ansible/secrets2" || echo "❌ ~/.ansible/secrets2"
 
 test -d ~/.ansible/collections/ansible_collections/ansible/platform && \
   echo "✅ ansible.platform" || echo "❌ ansible.platform"
@@ -248,8 +177,6 @@ test -d ~/.ansible/collections/ansible_collections/kubernetes/core && \
 
 oc whoami 2>/dev/null && echo "✅ oc — logged in" || echo "❌ oc — not logged in"
 helm version --short 2>/dev/null && echo "✅ helm" || echo "❌ helm"
-
-test -s ~/.ansible/aap_defaults.yml && echo "✅ ~/.ansible/aap_defaults.yml" || echo "❌ ~/.ansible/aap_defaults.yml"
 ```
 
 If everything is green:

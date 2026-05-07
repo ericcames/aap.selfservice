@@ -53,19 +53,6 @@
         state: present
 
     # -------------------------------------------------------------------------
-    # Vault Credential
-    # -------------------------------------------------------------------------
-
-    - name: Create vault credential
-      ansible.controller.credential:
-        name: "{{ my_vault }}"
-        organization: Default
-        credential_type: Vault
-        inputs:
-          vault_password: "{{ vault_password }}"
-        state: present
-
-    # -------------------------------------------------------------------------
     # Project
     # -------------------------------------------------------------------------
 
