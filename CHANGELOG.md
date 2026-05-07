@@ -4,6 +4,9 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+### Documentation
+- CLAUDE.md gains an "Expected Timings" section recording end-to-end deploy durations (validated 2026-05-06 against `rhdp-ames-test2`) plus diagnostic hints for when a step runs notably long (resolves #36)
+
 ### Added
 - `playbooks/sync_portal_orgs.yml` — queries AAP for all current organizations and patches the portal configmap live; run after `bootstrap_portal.yml` or standalone anytime orgs/teams/users change in AAP
 - `site.yml` — full from-scratch deploy: runs `bootstrap_aap.yml`, `bootstrap_portal.yml`, and `sync_portal_orgs.yml` in sequence

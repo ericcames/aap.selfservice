@@ -167,6 +167,25 @@ sync_portal_orgs.yml → Query AAP for all orgs, patch portal configmap, restart
 playbooks/site.yml   → runs all three in sequence (full from-scratch deploy)
 ```
 
+## Expected Timings
+
+End-to-end deploy via `/selfservice-bootstrap` against a fresh RHDP **Ansible Product Demo** environment. Validated 2026-05-06 against `rhdp-ames-test2`.
+
+| Step | Duration |
+|------|----------|
+| `bootstrap_aap.yml` | ~50s |
+| `bootstrap_portal.yml` | ~6m (Helm install + 10m wait timeout) |
+| `sync_portal_orgs.yml` configmap patch | ~5s |
+| Rolling pod restart after sync | ~3m |
+| **Total wall clock** | **~12 min** |
+
+Use as a sanity check when diagnosing a slow run:
+
+- `bootstrap_aap.yml` >2m — usually a slow `Sync aap.selfservice project` because the AAP container is busy or GitHub is slow.
+- `bootstrap_portal.yml` approaching 10m — the Helm `wait_timeout` is about to fire. Check `oc get pods -n aap-portal` for an init container stuck pulling from `registry.redhat.io` (auth secret issue) or a CrashLoopBackOff (config issue).
+- `sync_portal_orgs.yml` configmap patch >30s — the patch isn't applying; check `oc describe configmap rhaap-portal-app-config -n aap-portal`.
+- Rolling restart >5m — new pod is failing readiness; `oc logs -n aap-portal deploy/rhaap-portal -c backstage-backend --previous` is the first place to look.
+
 All playbooks are idempotent and can be run independently.
 
 `sync_portal_orgs.yml` must be run after `bootstrap_portal.yml` because the Helm chart sets several defaults that are wrong for a demo environment. It can also be run standalone anytime orgs, teams, or users change in AAP. It applies three fixes in one configmap patch:
