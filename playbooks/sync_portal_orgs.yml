@@ -111,22 +111,14 @@
                 annotations:
                   kubectl.kubernetes.io/restartedAt: "{{ now(utc=True, fmt='%Y-%m-%dT%H:%M:%SZ') }}"
 
-    - name: Wait for portal to be ready
-      kubernetes.core.k8s_info:
-        api_version: apps/v1
-        kind: Deployment
-        name: rhaap-portal
-        namespace: "{{ portal_namespace }}"
-        host: "{{ k8s_auth.host }}"
-        api_key: "{{ k8s_auth.api_key }}"
-        validate_certs: "{{ k8s_auth.validate_certs }}"
-      register: portal_deploy
-      retries: 20
-      delay: 15
-      until: >
-        portal_deploy.resources | length > 0 and
-        portal_deploy.resources[0].status.availableReplicas is defined and
-        portal_deploy.resources[0].status.availableReplicas >= 1
+    # availableReplicas >= 1 is satisfied throughout a rolling update because
+    # the old pod stays Running until the new pod is ready. Wait for the new
+    # ReplicaSet to fully roll out — otherwise the playbook returns while the
+    # old pod (with stale configmap) is still serving traffic.
+    - name: Wait for portal rollout to complete
+      ansible.builtin.command:
+        cmd: oc rollout status deployment/rhaap-portal -n {{ portal_namespace }} --timeout=5m
+      changed_when: false
 
     - name: Show configured org list
       ansible.builtin.debug:
