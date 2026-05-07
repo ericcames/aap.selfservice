@@ -37,7 +37,7 @@ import yaml, os
 path = os.path.expanduser('~/.ansible/aap_defaults.yml')
 try:
     d = yaml.safe_load(open(path)) or {}
-    missing = [k for k in ['my_vault','my_remote_vault','my_remote_ssh_pub_key'] if not d.get(k,'')]
+    missing = [k for k in ['my_vault'] if not d.get(k,'')]
     print('❌ ~/.ansible/aap_defaults.yml missing: ' + ', '.join(missing) if missing else '✅ ~/.ansible/aap_defaults.yml')
 except FileNotFoundError:
     print('❌ ~/.ansible/aap_defaults.yml — not found. Run /selfservice-first-time.')
@@ -121,7 +121,7 @@ Read user defaults:
 python3 -c "
 import yaml, os
 d = yaml.safe_load(open(os.path.expanduser('~/.ansible/aap_defaults.yml'))) or {}
-for k in ['my_vault','my_windows_catalog_short_description','my_remote_vault','my_remote_ssh_pub_key']:
+for k in ['my_vault']:
     print(k + '=' + str(d.get(k,'')))
 "
 ```
@@ -149,11 +149,7 @@ hub_token: "{{ lookup('ini', 'token section=galaxy_server.rh_certified file=~/.a
 vault_password: "{{ lookup('ansible.builtin.file', '~/.ansible/secrets2') | trim }}"
 hub_auth_url: "https://sso.redhat.com/auth/realms/redhat-external/protocol/openid-connect/token"
 portal_namespace: aap-portal
-aap_organization: Default
 my_vault: "<from aap_defaults.yml>"
-my_windows_catalog_short_description: "<from aap_defaults.yml>"
-my_remote_vault: "<from aap_defaults.yml>"
-my_remote_ssh_pub_key: "<from aap_defaults.yml>"
 ```
 
 Substitute the actual values from `aap_defaults.yml` — do not copy placeholder text.
