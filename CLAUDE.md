@@ -145,10 +145,10 @@ ANSIBLE_CONFIG=~/.ansible/ansible.cfg ansible-galaxy collection install -r colle
 
 The bootstrap playbook (`playbooks/bootstrap_portal.yml`) performs these steps in order:
 
-1. Create an AAP OAuth Application via AAP Controller API (captures `client_id`/`client_secret`)
+1. Create an AAP OAuth Application via AAP Gateway API (captures `client_id`/`client_secret`)
 2. Generate an AAP API token, store in OCP secret, delete token in `always:` block
 3. Create OCP project `aap-portal`
-4. Create OCP secrets (`aap-auth`, `git-auth`)
+4. Create OCP secrets (`secrets-rhaap-portal`, `rhaap-portal-dynamic-plugins-registry-auth`, `secrets-scm`)
 5. Deploy `redhat-rhaap-portal` Helm chart from `https://charts.openshift.io`
 6. Update OAuth redirect URI with the portal route
 7. Poll portal `/healthz` and verify job template sync
@@ -161,7 +161,7 @@ Key Helm values to configure:
 ## Playbook Execution Order
 
 ```
-bootstrap_aap.yml    → Hub creds, vault, project, OAuth app (ansible.platform)
+bootstrap_aap.yml    → Hub creds, project (ansible.controller)
 bootstrap_portal.yml → OCP project, secrets, Helm chart, OAuth wiring (kubernetes.core)
 sync_portal_orgs.yml → Query AAP for all orgs, patch portal configmap, restart pod
 playbooks/site.yml   → runs all three in sequence (full from-scratch deploy)
