@@ -47,8 +47,7 @@ ls inventories/ | grep rhdp
 Run immediately — no confirmation needed:
 
 ```bash
-ansible-playbook -i inventories/rhdp-<customer>-<demo>/ playbooks/sync_portal_orgs.yml \
-  --vault-password-file ~/.ansible/secrets2
+ansible-playbook -i inventories/rhdp-<customer>-<demo>/ playbooks/sync_portal_orgs.yml
 ```
 
 ## Step 3 — Confirm

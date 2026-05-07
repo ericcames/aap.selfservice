@@ -20,6 +20,7 @@ All notable changes to this project will be documented in this file.
 - `docs/images/redhatdemo.png` — Ansible Product Demo catalog item screenshot for onboarding
 
 ### Removed
+- AAP vault credential and `~/.ansible/secrets2` are no longer required to run this repo. Nothing in this repo's playbooks uses ansible-vault encrypted content, and no job templates reference the credential. Removed the `Create vault credential` task from `bootstrap_aap.yml`; dropped `secrets2` setup (Step 3) and `User Identity Defaults` (Step 7) from `selfservice-first-time`; dropped `--vault-password-file ~/.ansible/secrets2` from all `ansible-playbook` invocations in `selfservice-bootstrap` and `selfservice-sync`; dropped `vault_password`, `my_vault`, and the vault verify block from skill output and the sample inventory; updated README and CLAUDE.md (resolves #32)
 - `selfservice-first-time` skill: dropped Step 7 (SSH key setup) and Step 8 (hosted vault URL) along with the `my_remote_vault`, `my_remote_ssh_pub_key`, and `my_windows_catalog_short_description` prompts — none of these are referenced by any playbook in this repo (resolves #29)
 - `selfservice-bootstrap` skill: dropped the same vars from the read-defaults block and the inventory generation template; also dropped the unused `aap_organization` for consistency with the sample inventory (#28)
 

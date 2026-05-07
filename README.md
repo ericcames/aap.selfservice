@@ -56,8 +56,7 @@ Order the **Ansible Product Demo** catalog item from the [Red Hat Demo Platform 
 2. **OpenShift** — API access with cluster-admin (provided by RHDP Ansible Product Demo)
 3. **`oc` CLI** — logged in to the OCP cluster
 4. **`helm` CLI** — available locally
-6. **`~/.ansible/secrets2`** — vault password file (one line: your vault password)
-7. **Ansible collections** — install once, shared across all repos. Your Automation Hub token must be in `~/.ansible/ansible.cfg` under `[galaxy_server.rh_certified]`. Get it from [console.redhat.com](https://console.redhat.com) → Automation Hub → Connect to Hub → API token. Then install:
+5. **Ansible collections** — install once, shared across all repos. Your Automation Hub token must be in `~/.ansible/ansible.cfg` under `[galaxy_server.rh_certified]`. Get it from [console.redhat.com](https://console.redhat.com) → Automation Hub → Connect to Hub → API token. Then install:
 
 ```bash
 ANSIBLE_CONFIG=~/.ansible/ansible.cfg ansible-galaxy collection install -r collections/requirements.yml

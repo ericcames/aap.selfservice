@@ -18,11 +18,5 @@ ocp_token: "{{ lookup('ansible.builtin.env', 'OCP_TOKEN') }}"
 hub_token: "{{ lookup('ini', 'token section=galaxy_server.rh_certified file=~/.ansible/ansible.cfg') }}"
 hub_auth_url: "https://sso.redhat.com/auth/realms/redhat-external/protocol/openid-connect/token"
 
-# Vault credential
-# vault_password is read from ~/.ansible/secrets2 at runtime.
-# my_vault is the display name shown in the AAP UI — change to your preferred name.
-vault_password: "{{ lookup('ansible.builtin.file', '~/.ansible/secrets2') | trim }}"
-my_vault: "Sample Demo Vault"
-
 # Portal
 portal_namespace: aap-portal
