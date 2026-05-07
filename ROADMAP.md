@@ -62,11 +62,11 @@ first time has everything they need without relying on published plugins.
 to function. This replaces the dependency on `aap.as.code`.
 
 - ✅ Hub credentials (`Automation Hub - certified`, `Automation Hub - validated`) assigned to Default Organization
-- ✅ Vault credential
 - ✅ `aap.selfservice` project (synced from `main`)
-- ✅ AAP OAuth Application for portal authentication
 
-**Collections:** `ansible.platform` (OAuth app via gateway API), `ansible.controller` (credentials, project — no platform equivalent exists)
+**Collections:** `ansible.controller` (credentials, project — no platform equivalent exists)
+
+The OAuth Application for portal authentication is created by `bootstrap_portal.yml` (gateway registry, not controller) so credentials can be captured fresh on each deploy.
 
 ### Phase 3 — Portal Bootstrap Playbook ✅
 
@@ -88,18 +88,9 @@ to function. This replaces the dependency on `aap.as.code`.
 - GitHub/GitLab integrations must be explicitly disabled (`integrations.github: []`) when no SCM token provided
 - Gateway app client_secret must be captured at POST creation — never PATCH it (different hashing causes `invalid_client`)
 - Gateway `/o/authorize/` and `/o/token/` use the gateway app registry, NOT the controller's
+- `catalog.providers.rhaap.orgs` cannot be cleanly overridden via Helm values (chart uses a template expression as a YAML key causing DUPLICATE_KEY on merge); patched post-deploy by `sync_portal_orgs.yml` instead
 
-Build `playbooks/bootstrap_portal.yml` — full portal install on OpenShift.
 Reference: [Installing Self-Service Automation Portal](https://docs.redhat.com/en/documentation/red_hat_ansible_automation_platform/2.6/html/installing_self-service_automation_portal/index)
-
-**Tasks:**
-1. Create OCP project (`aap-portal`)
-2. Create OCP secrets (`aap-auth`, `git-auth`)
-3. Deploy `redhat-rhaap-portal` Helm chart (v2.1.0, pinned) from `https://charts.openshift.io`
-   - Key values: `clusterRouterBase`, `pluginMode: oci`
-   - Note: `catalog.providers.rhaap.orgs` cannot be cleanly overridden via Helm values (chart uses a template expression as a YAML key causing DUPLICATE_KEY on merge); patched post-deploy by `sync_portal_orgs.yml` instead
-4. Update AAP OAuth redirect URI with portal route
-5. Poll portal `/healthz` and verify job template sync
 
 **Collections:** `kubernetes.core`
 

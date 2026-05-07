@@ -29,7 +29,7 @@ AAP 2.5+ uses a gateway architecture:
 | Credential types | `$CONTROLLER_HOST/api/controller/v2/credential_types/` |
 | Projects | `$CONTROLLER_HOST/api/controller/v2/projects/` |
 | Job templates | `$CONTROLLER_HOST/api/controller/v2/job_templates/` |
-| OAuth applications | `$CONTROLLER_HOST/api/controller/v2/applications/` |
+| OAuth applications | `$CONTROLLER_HOST/api/gateway/v1/applications/` |
 
 ---
 
