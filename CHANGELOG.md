@@ -19,7 +19,12 @@ All notable changes to this project will be documented in this file.
 - `inventories/rhdp-sample-demo/` — template inventory for new RHDP environments
 - `docs/images/redhatdemo.png` — Ansible Product Demo catalog item screenshot for onboarding
 
+### Removed
+- `selfservice-first-time` skill: dropped Step 7 (SSH key setup) and Step 8 (hosted vault URL) along with the `my_remote_vault`, `my_remote_ssh_pub_key`, and `my_windows_catalog_short_description` prompts — none of these are referenced by any playbook in this repo (resolves #29)
+- `selfservice-bootstrap` skill: dropped the same vars from the read-defaults block and the inventory generation template; also dropped the unused `aap_organization` for consistency with the sample inventory (#28)
+
 ### Fixed
+- `selfservice-first-time` skill: replaced stale `/aap-bootstrap` references with `/selfservice-bootstrap` in the orientation header and final-validation success message (resolves #29)
 - `inventories/rhdp-sample-demo/group_vars/all.yml`: variable names now match what playbooks read (`aap_*` instead of `controller_*`); added required vars (`aap_validate_certs`, `hub_token`, `hub_auth_url`, `vault_password`, `my_vault`); removed unused `aap_organization`. Anyone copying this template can now run the playbooks without inventory edits beyond setting env vars (resolves #28)
 - Security: added `no_log: true` to tasks in `bootstrap_portal.yml` that register OAuth client_secret, AAP bearer token, and cluster pull secret — previously exposed in plaintext when running with `-v` (resolves #26)
 - Portal login failure for users in non-Default AAP organizations: Helm chart defaults `catalog.providers.rhaap.production.orgs` to `Default` only; `sync_portal_orgs.yml` now patches the configmap with the full org list queried live from AAP (resolves #18)

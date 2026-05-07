@@ -1,6 +1,6 @@
 # AAP Self-Service First-Time Setup
 
-This skill walks a new user through every local prerequisite needed to run `/aap-bootstrap` in this repo. Check what already exists, guide creation of anything missing, and end with a full preflight validation.
+This skill walks a new user through every local prerequisite needed to run `/selfservice-bootstrap` in this repo. Check what already exists, guide creation of anything missing, and end with a full preflight validation.
 
 Run this once on a new machine. If you've already done this setup, skip straight to `/selfservice-bootstrap`.
 
@@ -18,9 +18,7 @@ We'll set up:
   3. Required Ansible collections (ansible.platform, ansible.controller, kubernetes.core)
   4. oc CLI — logged in to OpenShift
   5. helm CLI — available locally
-  6. Your SSH key pair (local key + public key hosted at a URL)
-  7. Your vault file (secrets the demo uses at runtime)
-  8. Your identity defaults (~/.ansible/aap_defaults.yml)
+  6. Your identity defaults (~/.ansible/aap_defaults.yml)
 
 You'll also need your RHDP environment credentials handy:
   - AAP URL + password (from RHDP Services page)
@@ -78,16 +76,13 @@ oc whoami 2>/dev/null && echo "EXISTS: oc — logged in as $(oc whoami)" || echo
 # helm CLI
 helm version --short 2>/dev/null && echo "EXISTS: helm" || echo "MISSING: helm"
 
-# SSH key
-test -f ~/.ssh/id_rsa && echo "EXISTS: ~/.ssh/id_rsa" || echo "MISSING: ~/.ssh/id_rsa"
-
 # user defaults
 python3 -c "
 import yaml, os
 path = os.path.expanduser('~/.ansible/aap_defaults.yml')
 try:
     d = yaml.safe_load(open(path)) or {}
-    for k in ['my_vault','my_remote_vault','my_remote_ssh_pub_key','my_windows_catalog_short_description']:
+    for k in ['my_vault']:
         v = d.get(k,'')
         print(('EXISTS: ' if v else 'MISSING: ') + k + (': ' + str(v) if v else ''))
 except FileNotFoundError:
@@ -204,81 +199,13 @@ Validate:
 helm version --short && echo "✅ helm" || echo "❌ helm — not found"
 ```
 
-## Step 7 — SSH Key Check
-
-The SSH private key goes into your vault credential in AAP. The public key must be hosted at a public HTTPS raw URL so it can be fetched at runtime.
-
-### 7a. Check for a local RSA key
-
-```bash
-test -f ~/.ssh/id_rsa && echo "EXISTS" || echo "MISSING"
-```
-
-If missing, offer to generate one:
-```bash
-ssh-keygen -t rsa -b 4096 -f ~/.ssh/id_rsa
-```
-Show the command and ask for confirmation. Note that AWS requires RSA keys.
-
-### 7b. Check for a hosted public key URL
-
-Ask:
-> "Is your public SSH key hosted at a public HTTPS raw URL?
-> (e.g. https://raw.githubusercontent.com/youruser/yourrepo/main/id_rsa.pub)"
-
-If not, direct the user to host it in a public GitHub repo using the raw URL format.
-
-### 7c. Validate the hosted URL
-
-```bash
-curl -s "<hosted_pub_key_url>" | head -1
-```
-
-Confirm the response starts with `ssh-rsa`. If it returns HTML or a redirect, the URL is wrong.
-
-### 7d. Verify key pair matches
-
-```bash
-DERIVED=$(ssh-keygen -y -f ~/.ssh/id_rsa 2>/dev/null)
-HOSTED=$(curl -s "<hosted_pub_key_url>" | awk '{print $1, $2}')
-DERIVED_MATERIAL=$(echo "$DERIVED" | awk '{print $1, $2}')
-
-if [ "$DERIVED_MATERIAL" = "$HOSTED" ]; then
-  echo "✅ Key pair matches"
-else
-  echo "❌ Key pair mismatch — hosted key does not match ~/.ssh/id_rsa"
-fi
-```
-
-If `ssh-keygen -y` fails (passphrase-protected key), fall back to comparing `~/.ssh/id_rsa.pub` against the hosted URL.
-
-## Step 8 — Vault File Check
-
-The vault file holds runtime secrets. It must be hosted at a public HTTPS raw URL.
-
-Ask:
-> "Do you have a vault file hosted at a public HTTPS raw URL?"
-
-If yes, ask for the URL and validate:
-```bash
-curl -s -L "<vault_url>" | head -5
-```
-Check that the response is YAML (not HTML) and returns HTTP 200.
-
-If no, direct the user to:
-> "Copy the example vault from https://github.com/ericcames/sourcefiles/blob/main/vault_example.yml,
-> fill in your values, encrypt it with ansible-vault, and host it in a public GitHub repo at a raw URL."
-
-## Step 9 — User Identity Defaults
+## Step 7 — User Identity Defaults
 
 Write to `~/.ansible/aap_defaults.yml`. Skip any key that already has a non-empty value.
 
 Ask for each missing value:
 
 - **`my_vault`** — name for your vault credential in AAP (e.g. `Eric Ames`)
-- **`my_windows_catalog_short_description`** — ServiceNow Windows catalog description (default: `AAP Windows AWS Daily Demo`)
-- **`my_remote_vault`** — URL from Step 8
-- **`my_remote_ssh_pub_key`** — URL from Step 7b
 
 Write/merge using Python:
 
@@ -289,9 +216,6 @@ import yaml, os
 path = os.path.expanduser('~/.ansible/aap_defaults.yml')
 updates = {
     'my_vault': '<value>',
-    'my_windows_catalog_short_description': '<value>',
-    'my_remote_vault': '<url>',
-    'my_remote_ssh_pub_key': '<url>',
 }
 
 try:
@@ -306,7 +230,7 @@ print('✅ ~/.ansible/aap_defaults.yml written')
 EOF
 ```
 
-## Step 10 — Final Validation
+## Step 8 — Final Validation
 
 ```bash
 grep -q "galaxy_server.rh_certified" ~/.ansible/ansible.cfg 2>/dev/null && \
@@ -325,14 +249,13 @@ test -d ~/.ansible/collections/ansible_collections/kubernetes/core && \
 oc whoami 2>/dev/null && echo "✅ oc — logged in" || echo "❌ oc — not logged in"
 helm version --short 2>/dev/null && echo "✅ helm" || echo "❌ helm"
 
-test -f ~/.ssh/id_rsa && echo "✅ ~/.ssh/id_rsa" || echo "❌ ~/.ssh/id_rsa"
 test -s ~/.ansible/aap_defaults.yml && echo "✅ ~/.ansible/aap_defaults.yml" || echo "❌ ~/.ansible/aap_defaults.yml"
 ```
 
 If everything is green:
 ```
 All prerequisites are in place.
-Ready to run /aap-bootstrap.
+Ready to run /selfservice-bootstrap.
 ```
 
 If anything is red, tell the user which step to re-run. Do not proceed until all items are green.
