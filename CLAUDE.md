@@ -176,7 +176,7 @@ End-to-end deploy via `/selfservice-bootstrap` against a fresh RHDP **Ansible Pr
 | `bootstrap_aap.yml` | ~50s |
 | `bootstrap_portal.yml` | ~6m (Helm install + 10m wait timeout) |
 | `sync_portal_orgs.yml` (incl. rollout cutover) | ~4m |
-| **Total wall clock** | **~12 min** |
+| **Total wall clock** | **~11 min** |
 
 Use as a sanity check when diagnosing a slow run:
 
