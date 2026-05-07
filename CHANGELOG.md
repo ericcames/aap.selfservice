@@ -20,6 +20,7 @@ All notable changes to this project will be documented in this file.
 - `docs/images/redhatdemo.png` — Ansible Product Demo catalog item screenshot for onboarding
 
 ### Fixed
+- `inventories/rhdp-sample-demo/group_vars/all.yml`: variable names now match what playbooks read (`aap_*` instead of `controller_*`); added required vars (`aap_validate_certs`, `hub_token`, `hub_auth_url`, `vault_password`, `my_vault`); removed unused `aap_organization`. Anyone copying this template can now run the playbooks without inventory edits beyond setting env vars (resolves #28)
 - Security: added `no_log: true` to tasks in `bootstrap_portal.yml` that register OAuth client_secret, AAP bearer token, and cluster pull secret — previously exposed in plaintext when running with `-v` (resolves #26)
 - Portal login failure for users in non-Default AAP organizations: Helm chart defaults `catalog.providers.rhaap.production.orgs` to `Default` only; `sync_portal_orgs.yml` now patches the configmap with the full org list queried live from AAP (resolves #18)
 - Templates not visible to non-admin users: Helm chart enables Backstage RBAC (`permission.enabled: true`) with no policies, which defaults to deny-all for non-admins; `sync_portal_orgs.yml` disables permission enforcement — actual access control is enforced by AAP at job launch time (resolves #18)

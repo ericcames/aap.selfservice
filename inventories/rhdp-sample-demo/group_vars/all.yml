@@ -1,17 +1,28 @@
 ---
 # Self-Service Portal Bootstrap Inventory
 # Copy this directory to inventories/rhdp-<customer>-<demo>/
-# All sensitive values are read from environment variables at runtime — never hardcode here.
+# All sensitive values are resolved at runtime from environment variables
+# or files under ~/.ansible/ — never hardcode them here.
 
-# AAP Controller
-controller_host: "{{ lookup('env', 'CONTROLLER_HOST') }}"
-controller_username: "{{ lookup('env', 'CONTROLLER_USERNAME') | default('admin') }}"
-controller_password: "{{ lookup('env', 'CONTROLLER_PASSWORD') }}"
+# AAP Controller (env-resolved at runtime)
+aap_hostname: "{{ lookup('ansible.builtin.env', 'CONTROLLER_HOST') }}"
+aap_username: "{{ lookup('ansible.builtin.env', 'CONTROLLER_USERNAME') | default('admin', true) }}"
+aap_password: "{{ lookup('ansible.builtin.env', 'CONTROLLER_PASSWORD') }}"
+aap_validate_certs: false
 
-# OpenShift
+# OpenShift (env-resolved at runtime)
 ocp_host: "{{ lookup('ansible.builtin.env', 'OCP_HOST') }}"
 ocp_token: "{{ lookup('ansible.builtin.env', 'OCP_TOKEN') }}"
 
-# Portal settings
+# Automation Hub (token resolved from ~/.ansible/ansible.cfg)
+hub_token: "{{ lookup('ini', 'token section=galaxy_server.rh_certified file=~/.ansible/ansible.cfg') }}"
+hub_auth_url: "https://sso.redhat.com/auth/realms/redhat-external/protocol/openid-connect/token"
+
+# Vault credential
+# vault_password is read from ~/.ansible/secrets2 at runtime.
+# my_vault is the display name shown in the AAP UI — change to your preferred name.
+vault_password: "{{ lookup('ansible.builtin.file', '~/.ansible/secrets2') | trim }}"
+my_vault: "Sample Demo Vault"
+
+# Portal
 portal_namespace: aap-portal
-aap_organization: Default
