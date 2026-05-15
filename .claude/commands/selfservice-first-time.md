@@ -65,6 +65,9 @@ test -d ~/.ansible/collections/ansible_collections/ansible/controller && \
 ansible-galaxy collection list 2>/dev/null | grep -q "^kubernetes.core" && \
   echo "EXISTS: kubernetes.core" || echo "MISSING: kubernetes.core"
 
+# kubernetes Python library (required by bootstrap_portal.yml)
+python3 -c "import kubernetes" 2>/dev/null && echo "EXISTS: kubernetes python lib" || echo "MISSING: kubernetes python lib — run: pip3 install kubernetes"
+
 # oc CLI
 oc whoami 2>/dev/null && echo "EXISTS: oc — logged in as $(oc whoami)" || echo "MISSING: oc not found or not logged in"
 
@@ -174,6 +177,8 @@ test -d ~/.ansible/collections/ansible_collections/ansible/controller && \
   echo "✅ ansible.controller" || echo "❌ ansible.controller"
 test -d ~/.ansible/collections/ansible_collections/kubernetes/core && \
   echo "✅ kubernetes.core" || echo "❌ kubernetes.core"
+
+python3 -c "import kubernetes" 2>/dev/null && echo "✅ kubernetes python lib" || echo "❌ kubernetes python lib — run: pip3 install kubernetes"
 
 oc whoami 2>/dev/null && echo "✅ oc — logged in" || echo "❌ oc — not logged in"
 helm version --short 2>/dev/null && echo "✅ helm" || echo "❌ helm"

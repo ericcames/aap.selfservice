@@ -22,6 +22,9 @@ test -d ~/.ansible/collections/ansible_collections/ansible/controller && \
 test -d ~/.ansible/collections/ansible_collections/kubernetes/core && \
   echo "✅ kubernetes.core" || echo "❌ kubernetes.core"
 
+# kubernetes Python library (required by bootstrap_portal.yml)
+python3 -c "import kubernetes" 2>/dev/null && echo "✅ kubernetes python lib" || echo "❌ kubernetes python lib — run: pip3 install kubernetes"
+
 # oc CLI
 oc whoami 2>/dev/null && echo "✅ oc — logged in" || echo "❌ oc — not logged in"
 
@@ -62,12 +65,15 @@ echo "CONTROLLER_PASSWORD=${CONTROLLER_PASSWORD}"
 
 If all three are non-empty, skip to Step 3.
 
-### 2b. Prompt the user
+### 2b. Credentials in the conversation
+If the user has already pasted the AAP URL and password into the chat, set them directly in the Bash tool — do NOT ask the user to export them. Proceed immediately.
+
+### 2c. Prompt the user (only if not yet provided)
 Ask for:
 - **AAP URL** — from the RHDP Services page (e.g. `https://aap-aap.apps.cluster-xxxx.dynamic.redhatworkshops.io`)
 - **AAP Password** — from the RHDP Services page (username defaults to `admin`)
 
-Tell the user to set these in their shell:
+If the user must set them manually:
 ```bash
 export CONTROLLER_HOST=<url>
 export CONTROLLER_USERNAME=admin
@@ -87,12 +93,15 @@ If both are non-empty, skip to Step 4. Also verify `oc` is logged in to the corr
 oc whoami --show-server
 ```
 
-### 3b. Prompt the user
+### 3b. Credentials in the conversation
+If the user has already pasted the OCP API URL and token into the chat, set them and run `oc login` directly in the Bash tool — do NOT ask the user to do this. Proceed immediately.
+
+### 3c. Prompt the user (only if not yet provided)
 Ask for:
 - **OCP API URL** — from the RHDP Services page (e.g. `https://api.cluster-xxxx.dynamic.redhatworkshops.io:6443`)
 - **OCP Token** — from the RHDP Services page
 
-Tell the user to set these and log in:
+If the user must set them manually:
 ```bash
 export OCP_HOST=<ocp_api_url>
 export OCP_TOKEN=<token>

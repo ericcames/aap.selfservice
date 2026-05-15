@@ -89,9 +89,10 @@
             namespace: "{{ portal_namespace }}"
           data:
             app-config.yaml: "{{ updated_app_config | to_nice_yaml(indent=2) }}"
+      register: configmap_patch
 
     # -------------------------------------------------------------------------
-    # Restart portal to apply new config
+    # Restart portal to apply new config (only when configmap changed)
     # -------------------------------------------------------------------------
 
     - name: Restart portal deployment
@@ -110,6 +111,7 @@
               metadata:
                 annotations:
                   kubectl.kubernetes.io/restartedAt: "{{ now(utc=True, fmt='%Y-%m-%dT%H:%M:%SZ') }}"
+      when: configmap_patch.changed
 
     # availableReplicas >= 1 is satisfied throughout a rolling update because
     # the old pod stays Running until the new pod is ready. Wait for the new
@@ -119,6 +121,7 @@
       ansible.builtin.command:
         cmd: oc rollout status deployment/rhaap-portal -n {{ portal_namespace }} --timeout=5m
       changed_when: false
+      when: configmap_patch.changed
 
     - name: Show configured org list
       ansible.builtin.debug:

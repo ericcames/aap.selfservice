@@ -4,6 +4,13 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+### Fixed
+- `sync_portal_orgs.yml` — restart portal deployment only when configmap actually changed; no-op syncs now complete in seconds instead of ~4 minutes (closes #43)
+
+### Improved
+- `selfservice-bootstrap` skill — when AAP and OCP credentials are already in the conversation, set env vars and log in directly without asking the user to run export commands (closes #42 partial)
+- `selfservice-bootstrap` and `selfservice-first-time` skills — preflight now checks for the `kubernetes` Python library required by `bootstrap_portal.yml`; surfaces `pip3 install kubernetes` fix before the run fails mid-play (closes #42)
+
 ### Documentation
 - CLAUDE.md gains an "Expected Timings" section recording end-to-end deploy durations (validated 2026-05-06 against `rhdp-ames-test2`) plus diagnostic hints for when a step runs notably long (resolves #36)
 
